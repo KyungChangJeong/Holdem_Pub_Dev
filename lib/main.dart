@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:holdem_pub/view/shop.dart';
+import 'package:holdem_pub/view/shop_manage.dart';
 
 void main() {
   runApp(MyApp());
@@ -41,7 +42,7 @@ class ShopList extends StatelessWidget {
               // 매장 상세 정보 페이지 (Navigator)
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ShopInformation()),
+                MaterialPageRoute(builder: (context) => ShopManage()),
               );
             },
           ),
