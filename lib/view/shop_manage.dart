@@ -23,8 +23,14 @@ var GameUser = [
   {'nickname': '게임3', 'name': '굳굳', 'phonenumber': '010-1150-5991'},
 ];
 
+
 class _ShopManageState extends State<ShopManage> {
   String description = "~~~~~~~~~~";
+  
+  // Radio ListTile구현
+  String  _gameTableFlag = 'Wating';
+  String _shopFlag = "Open";
+
   Map<String, String> temp = {
     'nickname': '직접예약',
     'name': '알수없음',
@@ -33,6 +39,14 @@ class _ShopManageState extends State<ShopManage> {
 
   // 바 컨트롤러 생성
   final ScrollController _scrollController = ScrollController();
+  // 소개글 수정 컨트롤러
+  final _InformationTextEdit = TextEditingController();
+
+  @override
+  void dispose(){
+    _InformationTextEdit.dispose();
+    super.dispose();
+  }
 
   void _showMaterialDialog(Map<String, String> status, int index) {
     showDialog(
@@ -99,32 +113,60 @@ class _ShopManageState extends State<ShopManage> {
                   ),
 
                   // 매장 정보 변경
-                  Container(
-                      // width: 100,
-                      // height: 100,
-                      // child: Row(
-                      //   mainAxisAlignment: MainAxisAlignment.center,
-                      //   children: [
-                      //     // SizedBox(
-                      //     //     child: Image.network('https://picsum.photos/250?image=9')),
-                      //     // TextFiled로 내용 수정 가능
-                      //     Container(
-                      //       width: 100,
-                      //       height: 100,
-                      //       child: TextField(
-                      //         decoration: InputDecoration(
-                      //           // icon: Icon(Icons.shop),
-                      //           border: OutlineInputBorder(),
-                      //           labelText: description,
-                      //         ),
-                      //       ),
-                      //     )
-                      //   ],
-                      // ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 100,
+                          child: Image.network('https://picsum.photos/250?image=9')),
+                      // TextFiled로 내용 수정 가능
+                      Container(
+                        width: 100,
+                        height: 100,
+                        child: TextField(
+                          controller: _InformationTextEdit,
+                          decoration: InputDecoration(
+                            // icon: Icon(Icons.shop),
+                            border: OutlineInputBorder(),
+                            labelText: "소개글",
+                          ),
+                          onChanged: (text){
+                            description = _InformationTextEdit.text;
+                          },
+                        ),
                       ),
+                      TextButton(onPressed: (){
+                        print('description : $description');
+                      }, child: Text('저장'))
+                    ],
+                  ),
+
+                  // 테이블 별 게임 중 or 게임 대기중 / Open / Closed
+                  Container(
+                    /// RadioListTile로 구현중
+
+                    // child: ListTile(
+                    //   title: Text('게임중'),
+                    //   leading: RadioListTile(
+                    //     value: ,
+                    //     groupValue: _gameTableFlag,
+                    //     onChanged: (value){
+                    //       setState(() {
+                    //         _gameTableFlag = value;
+                    //       });
+                    //     },
+                    //   ),
+                    // ),
+                  ),
 
                   // 예약인원 설정 및 현재인원 설정 버튼
                   Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        width: 1,
+                        color: Colors.grey,
+                      ),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -136,7 +178,7 @@ class _ShopManageState extends State<ShopManage> {
                                     builder: (context) => ShopManageSetting()),
                               );
                             },
-                            child: Text('예약 설정')),
+                            child: Text('게임 예약 설정')),
 
                         // TextButton(onPressed: () {}, child: Text('현재 인원 설정')),
                       ],
