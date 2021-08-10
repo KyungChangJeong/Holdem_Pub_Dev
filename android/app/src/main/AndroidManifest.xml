@@ -19,8 +19,6 @@
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"/>
-<!--                android:name="com.kakao.sdk.AppKey"-->
-<!--                android:value="3ed12adaf33fb0a80dbaf44f6983027f"-->
 
             <!-- Displays an Android View that continues showing the launch screen
                  Drawable until Flutter paints its first frame, then this splash
