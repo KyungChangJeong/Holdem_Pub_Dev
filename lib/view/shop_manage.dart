@@ -32,6 +32,8 @@ class _ShopManageState extends State<ShopManage> {
   // Dialog 이름 컨트롤러
   final _dialogtextFieldController = TextEditingController();
 
+
+
   @override
   void initState() {}
 
@@ -152,8 +154,8 @@ class _ShopManageState extends State<ShopManage> {
           thickness: 15,
           child: ListView(
             controller: _scrollController,
-            // scrollDirection: Axis.vertical,
-            // shrinkWrap: true,
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
             children: [
               Column(
                 children: [
@@ -167,7 +169,7 @@ class _ShopManageState extends State<ShopManage> {
                   ),
 
                   // 매장 정보 변경
-                  Row(
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(
@@ -176,17 +178,18 @@ class _ShopManageState extends State<ShopManage> {
                               'https://picsum.photos/250?image=9')),
                       // TextFiled로 내용 수정 가능
                       Container(
-                        width: 100,
-                        height: 100,
+                        width: 300,
                         child: TextFormField(
-                          controller: _InformationTextEdit,
+                          initialValue: _shopData.getInfo(),
+                          // controller: _InformationTextEdit,
                           decoration: InputDecoration(
                             // icon: Icon(Icons.shop),
                             border: OutlineInputBorder(),
                             labelText: "소개글",
                           ),
+
                           onChanged: (text) {
-                            _shopData.changeInfo(_InformationTextEdit.text);
+                            _shopData.changeInfo(text);
                           },
                         ),
                       ),

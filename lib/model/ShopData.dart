@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ShopData with ChangeNotifier {
   String shopName = "테스트";
   String shopImage = "https://picsum.photos/250?image=9";
-  String _shopInfo = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~테스트 1";
+  String _shopInfo = "테스트 1";
 
   int _reserveNum = 0;
   int _nowNum = 0;
