@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:holdem_pub/model/user.dart';
+import 'package:holdem_pub/model/ShopData.dart';
 import 'package:holdem_pub/view/shop_manage_setting.dart';
 import 'package:holdem_pub/view/shop.dart';
+import 'package:provider/provider.dart';
 
 class ShopManage extends StatefulWidget {
   const ShopManage({Key? key}) : super(key: key);
@@ -11,25 +12,24 @@ class ShopManage extends StatefulWidget {
 }
 
 var ReserveUser = [
-  {'nickname': '예약1', 'name': '선명', 'phonenumber': '010-2620-5991'},
-  {'nickname': '예약2', 'name': '경민', 'phonenumber': '010-1230-5991'},
-  {'nickname': '예약3', 'name': '경창', 'phonenumber': '010-8720-8661'},
-  {'nickname': '예약4', 'name': '제현', 'phonenumber': '010-215691'},
-  {'nickname': '예약5', 'name': '우석', 'phonenumber': '05405'}
+  // {'nickname': '예약1', 'name': '선명', 'phonenumber': '010-2620-5991'},
+  // {'nickname': '예약2', 'name': '경민', 'phonenumber': '010-1230-5991'},
+  // {'nickname': '예약3', 'name': '경창', 'phonenumber': '010-8720-8661'},
+  // {'nickname': '예약4', 'name': '제현', 'phonenumber': '010-215691'},
+  // {'nickname': '예약5', 'name': '우석', 'phonenumber': '05405'}
 ];
 var GameUser = [
-  {'nickname': '게임1', 'name': '당당', 'phonenumber': '010-1561-8661'},
-  {'nickname': '게임2', 'name': '수구리', 'phonenumber': '010-2156-1591'},
-  {'nickname': '게임3', 'name': '굳굳', 'phonenumber': '010-1150-5991'},
+  // {'nickname': '게임1', 'name': '당당', 'phonenumber': '010-1561-8661'},
+  // {'nickname': '게임2', 'name': '수구리', 'phonenumber': '010-2156-1591'},
+  // {'nickname': '게임3', 'name': '굳굳', 'phonenumber': '010-1150-5991'},
 ];
-
 
 class _ShopManageState extends State<ShopManage> {
   String description = "~~~~~~~~~~";
-  
+
   // Radio ListTile구현
-  String  _gameTableFlag = 'Wating';
-  String _shopFlag = "Open";
+  String _gameTableFlag = 'Wating';
+  String _shopFlag = 'Closed';
 
   Map<String, String> temp = {
     'nickname': '직접예약',
@@ -39,15 +39,17 @@ class _ShopManageState extends State<ShopManage> {
 
   // 바 컨트롤러 생성
   final ScrollController _scrollController = ScrollController();
+
   // 소개글 수정 컨트롤러
   final _InformationTextEdit = TextEditingController();
 
   @override
-  void dispose(){
+  void dispose() {
     _InformationTextEdit.dispose();
     super.dispose();
   }
 
+  /// slidable로 변경
   void _showMaterialDialog(Map<String, String> status, int index) {
     showDialog(
         context: context,
@@ -84,8 +86,12 @@ class _ShopManageState extends State<ShopManage> {
     Navigator.pop(context);
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    ShopData _shopData = Provider.of<ShopData>(context);
+
     return Scaffold(
         appBar: AppBar(
           title: Text('관리자 페이지'),
@@ -107,7 +113,7 @@ class _ShopManageState extends State<ShopManage> {
                   Container(
                     padding: EdgeInsets.all(20),
                     child: Text(
-                      '매장 1',
+                      '${_shopData.shopName}(관리자)',
                       style: TextStyle(fontSize: 18),
                     ),
                   ),
@@ -117,8 +123,9 @@ class _ShopManageState extends State<ShopManage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(
-                        width: 100,
-                          child: Image.network('https://picsum.photos/250?image=9')),
+                          width: 100,
+                          child: Image.network(
+                              'https://picsum.photos/250?image=9')),
                       // TextFiled로 내용 수정 가능
                       Container(
                         width: 100,
@@ -130,34 +137,95 @@ class _ShopManageState extends State<ShopManage> {
                             border: OutlineInputBorder(),
                             labelText: "소개글",
                           ),
-                          onChanged: (text){
-                            description = _InformationTextEdit.text;
+                          onChanged: (text) {
+                            _shopData.changeInfo(_InformationTextEdit.text);
                           },
                         ),
                       ),
-                      TextButton(onPressed: (){
-                        print('description : $description');
-                      }, child: Text('저장'))
+                      TextButton(
+                          onPressed: () {
+                            print('description : $description');
+                          },
+                          child: Text('저장'))
                     ],
                   ),
 
                   // 테이블 별 게임 중 or 게임 대기중 / Open / Closed
                   Container(
-                    /// RadioListTile로 구현중
-
-                    // child: ListTile(
-                    //   title: Text('게임중'),
-                    //   leading: RadioListTile(
-                    //     value: ,
-                    //     groupValue: _gameTableFlag,
-                    //     onChanged: (value){
-                    //       setState(() {
-                    //         _gameTableFlag = value;
-                    //       });
-                    //     },
-                    //   ),
-                    // ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        width: 1,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    height: 250,
+                    width: 200,
+                    child: Column(
+                      children: [
+                        // 게임 진행여부 판단
+                        Column(
+                          children: [
+                            RadioListTile(
+                              title: Text('게임중'),
+                              // InGame
+                              value: "InGame",
+                              groupValue: _gameTableFlag,
+                              onChanged: (value) {
+                                setState(() {
+                                  _gameTableFlag = value.toString();
+                                });
+                              },
+                            ),
+                            RadioListTile(
+                              title: Text('게임 대기중'),
+                              // InGame
+                              value: "Waiting",
+                              groupValue: _gameTableFlag,
+                              onChanged: (value) {
+                                setState(() {
+                                  _gameTableFlag = value.toString();
+                                });
+                              },
+                            )
+                          ],
+                        ),
+                        // 매장 오픈 / 마감 여부
+                        Column(
+                          children: [
+                            RadioListTile(
+                              title: Text('Open'),
+                              // InGame
+                              value: "Open",
+                              groupValue: _shopFlag,
+                              onChanged: (value) {
+                                setState(() {
+                                  _shopFlag = value.toString();
+                                });
+                              },
+                            ),
+                            RadioListTile(
+                              title: Text('마감'),
+                              // InGame
+                              value: "Closed",
+                              groupValue: _shopFlag,
+                              onChanged: (value) {
+                                setState(() {
+                                  _shopFlag = value.toString();
+                                });
+                              },
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+
+                  // 주소 입력 => 지도로 변환
+                  Container(
+
+                    
+                  ),
+
 
                   // 예약인원 설정 및 현재인원 설정 버튼
                   Container(
@@ -193,45 +261,16 @@ class _ShopManageState extends State<ShopManage> {
                         color: Colors.grey,
                       ),
                     ),
-
-                    /// Listbuilder로 변경하기 (동적 생성)
-                    // Local 데이터로 삭제 및 수락 가능하도록
-                    // child: ListView(
-                    //   scrollDirection: Axis.vertical,
-                    //   shrinkWrap: true,
-                    //   children: [
-                    //     Text(
-                    //       '예약자 현황 \n',
-                    //       style: TextStyle(fontSize: 18),
-                    //     ),
-                    //     Container(
-                    //       child: Row(
-                    //         mainAxisAlignment: MainAxisAlignment.center,
-                    //         children: [
-                    //           Text('닉네임'),
-                    //           TextButton(onPressed: (){
-                    //             // 게임 대기 인원으로 내리기
-                    //           }, child: Text('현재인원으로 전환')),
-                    //           TextButton(onPressed: (){
-                    //             // List 삭제
-                    //             // print("User1 : ${User1[3]['name']}");
-                    //           }, child: Text('취소')),
-                    //         ],
-                    //       ),
-                    //
-                    //     ),
-                    //   ],
-                    // ),
-
                     child: Column(
                       children: [
                         Text(
-                          '대기 인원',
+                          '대기 인원 (${ReserveUser.length})',
                           style: TextStyle(fontSize: 18),
                         ),
                         // 관리자 직접 예약자 추가
                         IconButton(
                             onPressed: () {
+                              _shopData.reserve_increment();
                               setState(() {
                                 // ReserveUser
                                 ReserveUser.add(temp);
@@ -275,10 +314,14 @@ class _ShopManageState extends State<ShopManage> {
                     ),
                     child: Column(
                       children: [
-                        Text('현재인원'),
+                        Text(
+                          '현재인원 (${GameUser.length})',
+                          style: TextStyle(fontSize: 18),
+                        ),
                         // 사용자 현재인원 직접 추가
                         IconButton(
                             onPressed: () {
+                              _shopData.now_increment();
                               setState(() {
                                 // GameUser
                                 GameUser.add(temp);

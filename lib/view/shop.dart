@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_kakao_map/flutter_kakao_map.dart';
 import 'package:flutter_kakao_map/kakao_maps_flutter_platform_interface.dart';
+import 'package:holdem_pub/model/ShopData.dart';
 import 'package:kakaomap_webview/kakaomap_webview.dart';
+import 'package:provider/provider.dart';
 
 class ShopInformation extends StatefulWidget {
   @override
@@ -14,57 +16,67 @@ const String kakaoMapKey = 'e281adbe18c6cce0487f2be5167a487c';
 class _ShopInformationState extends State<ShopInformation> {
   int reservation_people = 2;
   int now_people = 4;
+
+  // 페이지 이동시 예약을 했음에도 false로 변경되는 상황
+  // DB에 넣든지, local data에 저장하던지 방법을 변경해야함
   bool game_set_flag = false;
   bool game_reserve_flag = false;
 
-  void showAlertDialog(BuildContext context) async {
-    String result = await showDialog(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('예약'),
-          content: game_reserve_flag
-              ? Text("예약을 취소 하시겠습니까?")
-              : Text("7:30분 게임에 예약하시겠습니까?"),
-          actions: <Widget>[
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.pop(context, "OK");
-                setState(() {
-                  // 예약 취소 상태
-                  if(game_reserve_flag){
-                    reservation_people--;
-                  }
-                  // 예약 하기 상태
-                  else{
-                    reservation_people++;
-                  }
 
-                  game_reserve_flag = !game_reserve_flag;
-                });
-              },
-            ),
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.pop(context, "Cancel");
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
+    ShopData _shopData = Provider.of<ShopData>(context);
+
+    void showAlertDialog(BuildContext context) async {
+      String result = await showDialog(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('예약'),
+            content: game_reserve_flag
+                ? Text("예약을 취소 하시겠습니까?")
+                : Text("7:30분 게임에 예약하시겠습니까?"),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.pop(context, "OK");
+                  setState(() {
+                    // 예약 취소 상태
+                    if(game_reserve_flag){
+                      _shopData.reserve_decrement();
+                    }
+                    // 예약 하기 상태
+                    else{
+                      _shopData.reserve_increment();
+                      /// DB 사용자의 예약 정보 등록하기
+                      // FireStore
+                    }
+                    game_reserve_flag = !game_reserve_flag;
+                  });
+                },
+              ),
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.pop(context, "Cancel");
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('매장 상세정보'),
       ),
-      body: Column(
+      body: ListView(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
         children: [
           Container(
             width: 200,
@@ -72,19 +84,18 @@ class _ShopInformationState extends State<ShopInformation> {
             // 매장 이름
             child: Center(
                 child: Text(
-              '매장1',
+              '${_shopData.shopName}(사용자)',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             )),
           ),
           Container(
             // 로고 /  소개글
-            child: Row(
+            child: Column(
               children: [
                 // Storage 이미지 저장 => FireStore 이미지 경로
                 // Image
-                Expanded(
-                    child: Image.network('https://picsum.photos/250?image=9')),
-                Text('소개글 ~~~~~~~~~~~~~~~'),
+                Image.network('https://picsum.photos/250?image=9'),
+                Text('소개글 : ${_shopData.getInfo()}'),
               ],
             ),
           ),
@@ -108,13 +119,13 @@ class _ShopInformationState extends State<ShopInformation> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('예약인원 : $reservation_people명'),
+                    Text('예약인원 : ${_shopData.getReserveNum()}명'),
                     game_reserve_flag ? Text('  예약됨', style: TextStyle(
                       color: Colors.red,
                     ),) : Text(''),
                   ],
                 ),
-                Text('현재인원 : $now_people명'),
+                Text('현재인원 : ${_shopData.getNowNum()}명'),
               ],
             ),
           ),

@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:holdem_pub/view/shop.dart';
 import 'package:holdem_pub/view/shop_manage.dart';
+import 'package:provider/provider.dart';
+
+import 'model/ShopData.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(
+      create: (BuildContext context) => ShopData(),
+    ),
+    Provider(
+      create: (context) => ShopList(),
+    ),
+    Provider(
+      create: (context) => ShopManage(),
+    ),
+    Provider(
+      create: (context) => ShopInformation(),
+    ),
+  ], child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -21,8 +37,13 @@ class MyApp extends StatelessWidget {
 }
 
 class ShopList extends StatelessWidget {
+
+
   @override
   Widget build(BuildContext context) {
+    late ShopData _shopdata;
+    _shopdata = Provider.of<ShopData>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Shop List'),
@@ -31,11 +52,11 @@ class ShopList extends StatelessWidget {
         children: [
           ListTile(
             leading: Icon(Icons.add),
-            title: Text('매장1'),
+            title: Text('${_shopdata.shopName}(관리자)'),
             trailing: Column(
               children: [
-                Text('예약자 : ~명'),
-                Text('게임인원 : ~명'),
+                Text('예약자 : ${_shopdata.getReserveNum()}명'),
+                Text('게임인원 : ${_shopdata.getNowNum()}명'),
               ],
             ),
             onTap: () {
@@ -48,11 +69,11 @@ class ShopList extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.add),
-            title: Text('매장2'),
+            title: Text('${_shopdata.shopName}(사용자)'),
             trailing: Column(
               children: [
-                Text('예약자 : ~명'),
-                Text('게임인원 : ~명'),
+                Text('예약자 : ${_shopdata.getReserveNum()}명'),
+                Text('게임인원 : ${_shopdata.getNowNum()}명'),
               ],
             ),
             onTap: () {
