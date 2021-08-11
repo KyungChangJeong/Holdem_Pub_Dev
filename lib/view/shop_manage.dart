@@ -3,6 +3,7 @@ import 'package:holdem_pub/model/ShopData.dart';
 import 'package:holdem_pub/view/shop_manage_setting.dart';
 import 'package:holdem_pub/view/shop.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class ShopManage extends StatefulWidget {
   const ShopManage({Key? key}) : super(key: key);
@@ -28,9 +29,10 @@ class _ShopManageState extends State<ShopManage> {
   String description = "~~~~~~~~~~";
 
   // Radio ListTile구현
-  String _gameTableFlag = 'Wating';
+  String _gameTableFlag = 'Waiting';
   String _shopFlag = 'Closed';
 
+  // 직접입력 데이터
   Map<String, String> temp = {
     'nickname': '직접예약',
     'name': '알수없음',
@@ -44,53 +46,52 @@ class _ShopManageState extends State<ShopManage> {
   final _InformationTextEdit = TextEditingController();
 
   @override
+  void initState() {}
+
+  @override
   void dispose() {
     _InformationTextEdit.dispose();
     super.dispose();
   }
 
-  /// slidable로 변경
-  void _showMaterialDialog(Map<String, String> status, int index) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('상태 변경'),
-            // content: Text('ㅎㅇ'),
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () {
-                    _dismissDialog();
-                    print('status: $status');
-                    // 예약 => 게임
-                    setState(() {
-                      // ReserveUser에서 status 삭제
-                      ReserveUser.removeAt(index);
-                      // GameUser에 status 추가
-                      GameUser.add(status);
-                    });
-                  },
-                  child: Text('수락')),
-              TextButton(
-                onPressed: () {
-                  _dismissDialog();
-                },
-                child: Text('취소'),
-              )
-            ],
-          );
-        });
-  }
-
-  _dismissDialog() {
-    Navigator.pop(context);
-  }
-
-
-
   @override
   Widget build(BuildContext context) {
     ShopData _shopData = Provider.of<ShopData>(context);
+
+
+    void _showMaterialDialog(Map<String, String> status, int index) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('상태 변경'),
+              // content: Text('ㅎㅇ'),
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () {
+                      print('status: $status');
+                      // 예약 => 게임
+                      setState(() {
+                        // ReserveUser에서 status 삭제
+                        ReserveUser.removeAt(index);
+                        _shopData.reserve_decrement();
+                        // GameUser에 status 추가
+                        GameUser.add(status);
+                        _shopData.now_increment();
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Text('수락')),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('취소'),
+                )
+              ],
+            );
+          });
+    }
 
     return Scaffold(
         appBar: AppBar(
@@ -130,7 +131,7 @@ class _ShopManageState extends State<ShopManage> {
                       Container(
                         width: 100,
                         height: 100,
-                        child: TextField(
+                        child: TextFormField(
                           controller: _InformationTextEdit,
                           decoration: InputDecoration(
                             // icon: Icon(Icons.shop),
@@ -221,12 +222,9 @@ class _ShopManageState extends State<ShopManage> {
                   ),
 
                   // 주소 입력 => 지도로 변환
-                  Container(
+                  Container(),
 
-                    
-                  ),
-
-
+                   /// List -> slidable로 변경하기
                   // 예약인원 설정 및 현재인원 설정 버튼
                   Container(
                     decoration: BoxDecoration(
@@ -247,7 +245,6 @@ class _ShopManageState extends State<ShopManage> {
                               );
                             },
                             child: Text('게임 예약 설정')),
-
                         // TextButton(onPressed: () {}, child: Text('현재 인원 설정')),
                       ],
                     ),
@@ -264,12 +261,13 @@ class _ShopManageState extends State<ShopManage> {
                     child: Column(
                       children: [
                         Text(
-                          '대기 인원 (${ReserveUser.length})',
+                          '대기 인원 (${_shopData.getReserveNum()})',
                           style: TextStyle(fontSize: 18),
                         ),
                         // 관리자 직접 예약자 추가
                         IconButton(
                             onPressed: () {
+                              // 대기인원 provider 추가
                               _shopData.reserve_increment();
                               setState(() {
                                 // ReserveUser
@@ -315,12 +313,13 @@ class _ShopManageState extends State<ShopManage> {
                     child: Column(
                       children: [
                         Text(
-                          '현재인원 (${GameUser.length})',
+                          '현재인원 (${_shopData.getNowNum()})',
                           style: TextStyle(fontSize: 18),
                         ),
                         // 사용자 현재인원 직접 추가
                         IconButton(
                             onPressed: () {
+                              // 현재인원 provider 추가
                               _shopData.now_increment();
                               setState(() {
                                 // GameUser
