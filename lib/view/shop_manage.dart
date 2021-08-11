@@ -11,39 +11,26 @@ class ShopManage extends StatefulWidget {
   @override
   _ShopManageState createState() => _ShopManageState();
 }
-
-var ReserveUser = [
-  // {'nickname': '예약1', 'name': '선명', 'phonenumber': '010-2620-5991'},
-  // {'nickname': '예약2', 'name': '경민', 'phonenumber': '010-1230-5991'},
-  // {'nickname': '예약3', 'name': '경창', 'phonenumber': '010-8720-8661'},
-  // {'nickname': '예약4', 'name': '제현', 'phonenumber': '010-215691'},
-  // {'nickname': '예약5', 'name': '우석', 'phonenumber': '05405'}
-];
-var GameUser = [
-  // {'nickname': '게임1', 'name': '당당', 'phonenumber': '010-1561-8661'},
-  // {'nickname': '게임2', 'name': '수구리', 'phonenumber': '010-2156-1591'},
-  // {'nickname': '게임3', 'name': '굳굳', 'phonenumber': '010-1150-5991'},
-];
+var ReserveUser = [];
+var GameUser = [];
 
 class _ShopManageState extends State<ShopManage> {
-  String description = "~~~~~~~~~~";
 
   // Radio ListTile구현
   String _gameTableFlag = 'Waiting';
   String _shopFlag = 'Closed';
 
   // 직접입력 데이터
-  Map<String, String> temp = {
-    'nickname': '직접예약',
-    'name': '알수없음',
-    'phonenumber': ''
-  };
+  String temp = '이름없음';
 
   // 바 컨트롤러 생성
   final ScrollController _scrollController = ScrollController();
 
   // 소개글 수정 컨트롤러
   final _InformationTextEdit = TextEditingController();
+
+  // Dialog 이름 컨트롤러
+  final _dialogtextFieldController = TextEditingController();
 
   @override
   void initState() {}
@@ -58,8 +45,7 @@ class _ShopManageState extends State<ShopManage> {
   Widget build(BuildContext context) {
     ShopData _shopData = Provider.of<ShopData>(context);
 
-
-    void _showMaterialDialog(Map<String, String> status, int index) {
+    void _showMaterialDialog(String status, int index) {
       showDialog(
           context: context,
           builder: (context) {
@@ -69,16 +55,19 @@ class _ShopManageState extends State<ShopManage> {
               actions: <Widget>[
                 TextButton(
                     onPressed: () {
-                      print('status: $status');
                       // 예약 => 게임
                       setState(() {
                         // ReserveUser에서 status 삭제
                         ReserveUser.removeAt(index);
                         _shopData.reserve_decrement();
+
                         // GameUser에 status 추가
                         GameUser.add(status);
                         _shopData.now_increment();
                       });
+                      print('대기인원 : ${ReserveUser}');
+                      print('현재인원 : ${GameUser}');
+
                       Navigator.pop(context);
                     },
                     child: Text('수락')),
@@ -87,6 +76,38 @@ class _ShopManageState extends State<ShopManage> {
                     Navigator.pop(context);
                   },
                   child: Text('취소'),
+                )
+              ],
+            );
+          });
+    }
+
+    void _reserveDialog() async {
+      return showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('대기 명단 추가'),
+              content: TextField(
+                controller: _dialogtextFieldController,
+                textInputAction: TextInputAction.go,
+                decoration: InputDecoration(hintText: "사용자 이름"),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('추가'),
+                  onPressed: () {
+                    // ReserveUser
+                    // 대기 명단이 중복 덮어쓰기됨 현상 / 게임 명단또한 중복 덮어쓰기됨
+                    temp = _dialogtextFieldController.text;
+                    print('ReserveUser: $ReserveUser');
+                    print('ReserveUser.runtype: ${ReserveUser.runtimeType}');
+                    setState(() {
+                      _shopData.reserve_increment();
+                      ReserveUser.add(temp);
+                    });
+                    Navigator.of(context).pop();
+                  },
                 )
               ],
             );
@@ -143,11 +164,7 @@ class _ShopManageState extends State<ShopManage> {
                           },
                         ),
                       ),
-                      TextButton(
-                          onPressed: () {
-                            print('description : $description');
-                          },
-                          child: Text('저장'))
+                      TextButton(onPressed: () {}, child: Text('저장'))
                     ],
                   ),
 
@@ -224,7 +241,13 @@ class _ShopManageState extends State<ShopManage> {
                   // 주소 입력 => 지도로 변환
                   Container(),
 
-                   /// List -> slidable로 변경하기
+                  // slidable Test
+                  Container(
+                      // child:  Orientation,
+
+                      ),
+
+                  /// List -> slidable로 변경하기
                   // 예약인원 설정 및 현재인원 설정 버튼
                   Container(
                     decoration: BoxDecoration(
@@ -264,15 +287,12 @@ class _ShopManageState extends State<ShopManage> {
                           '대기 인원 (${_shopData.getReserveNum()})',
                           style: TextStyle(fontSize: 18),
                         ),
-                        // 관리자 직접 예약자 추가
+
+                        /// 관리자 직접 예약자 추가
                         IconButton(
                             onPressed: () {
-                              // 대기인원 provider 추가
-                              _shopData.reserve_increment();
-                              setState(() {
-                                // ReserveUser
-                                ReserveUser.add(temp);
-                              });
+                              // 대기인원 명단 작성
+                              _reserveDialog();
                             },
                             icon: Icon(Icons.add)),
                         Container(
@@ -283,17 +303,15 @@ class _ShopManageState extends State<ShopManage> {
                             itemBuilder: (BuildContext context, int index) {
                               return new ListTile(
                                 onTap: () {
-                                  print(ReserveUser.runtimeType);
                                   _showMaterialDialog(
                                       ReserveUser[index], index);
                                 },
                                 leading: Icon(Icons.person),
-                                title: Text(
-                                    ReserveUser[index]['nickname'].toString()),
-                                subtitle:
-                                    Text(ReserveUser[index]['name'].toString()),
-                                trailing: Text(ReserveUser[index]['phonenumber']
-                                    .toString()),
+                                title: Text(ReserveUser[index].toString()),
+                                // subtitle:
+                                //     Text(ReserveUser[index]['name'].toString()),
+                                // trailing: Text(ReserveUser[index]['phonenumber']
+                                //     .toString()),
                               );
                             },
                           ),
@@ -335,12 +353,11 @@ class _ShopManageState extends State<ShopManage> {
                             itemBuilder: (BuildContext context, int index) {
                               return new ListTile(
                                 leading: Icon(Icons.person),
-                                title: Text(
-                                    GameUser[index]['nickname'].toString()),
-                                subtitle:
-                                    Text(GameUser[index]['name'].toString()),
-                                trailing: Text(
-                                    GameUser[index]['phonenumber'].toString()),
+                                title: Text(GameUser[index].toString()),
+                                // subtitle:
+                                //     Text(GameUser[index].toString()),
+                                // trailing: Text(
+                                //     GameUser[index].toString()),
                               );
                             },
                           ),
