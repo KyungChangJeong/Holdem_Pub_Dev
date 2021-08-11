@@ -82,7 +82,7 @@ class _ShopManageState extends State<ShopManage> {
           });
     }
 
-    void _reserveDialog() async {
+    void _reserveUserDialog() async {
       return showDialog(
           context: context,
           builder: (context) {
@@ -100,11 +100,37 @@ class _ShopManageState extends State<ShopManage> {
                     // ReserveUser
                     // 대기 명단이 중복 덮어쓰기됨 현상 / 게임 명단또한 중복 덮어쓰기됨
                     temp = _dialogtextFieldController.text;
-                    print('ReserveUser: $ReserveUser');
-                    print('ReserveUser.runtype: ${ReserveUser.runtimeType}');
                     setState(() {
                       _shopData.reserve_increment();
                       ReserveUser.add(temp);
+                    });
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          });
+    }
+    void _nowUserDialog() async {
+      return showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('게임 명단 추가'),
+              content: TextField(
+                controller: _dialogtextFieldController,
+                textInputAction: TextInputAction.go,
+                decoration: InputDecoration(hintText: "사용자 이름"),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('추가'),
+                  onPressed: () {
+                    // GameUser
+                    temp = _dialogtextFieldController.text;
+                    setState(() {
+                      _shopData.now_increment();
+                      GameUser.add(temp);
                     });
                     Navigator.of(context).pop();
                   },
@@ -292,7 +318,7 @@ class _ShopManageState extends State<ShopManage> {
                         IconButton(
                             onPressed: () {
                               // 대기인원 명단 작성
-                              _reserveDialog();
+                              _reserveUserDialog();
                             },
                             icon: Icon(Icons.add)),
                         Container(
@@ -337,12 +363,7 @@ class _ShopManageState extends State<ShopManage> {
                         // 사용자 현재인원 직접 추가
                         IconButton(
                             onPressed: () {
-                              // 현재인원 provider 추가
-                              _shopData.now_increment();
-                              setState(() {
-                                // GameUser
-                                GameUser.add(temp);
-                              });
+                              _nowUserDialog();
                             },
                             icon: Icon(Icons.add)),
                         Container(
