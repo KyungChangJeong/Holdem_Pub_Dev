@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "370556624469",
+    "project_id": "holdempub-a390f",
+    "storage_bucket": "holdempub-a390f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:370556624469:android:0ef02cf8dbf419fd69bedc",
+        "android_client_info": {
+          "package_name": "com.example.holdem_pub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "370556624469-8df847om0c2uj963ne3aih917i34oibr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlXX26rc97m_FG1mUiLs5dxxpGNI_PkFU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "370556624469-8df847om0c2uj963ne3aih917i34oibr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "370556624469-s4jgn2gpb1v0opusq55s5qs22fe7tkd8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.holdemPub"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

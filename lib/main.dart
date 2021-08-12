@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:holdem_pub/view/shop.dart';
 import 'package:holdem_pub/view/shop_manage.dart';
 import 'package:provider/provider.dart';
-
 import 'model/ShopData.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
       create: (BuildContext context) => ShopData(),
