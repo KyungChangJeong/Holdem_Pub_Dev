@@ -6,11 +6,11 @@ class ShopData with ChangeNotifier {
   String _shopInfo = "테스트 1";
 
   int _reserveNum = 0;
-  int _nowNum = 0;
+  int _gameNum = 0;
 
   String getInfo() => _shopInfo;
   int getReserveNum() => _reserveNum;
-  int getNowNum() => _nowNum;
+  int getGameNum() => _gameNum;
 
   void changeInfo(String input){
     _shopInfo = input;
@@ -27,13 +27,13 @@ class ShopData with ChangeNotifier {
     notifyListeners(); //must be inserted
   }
 
-  void now_increment() {
-    _nowNum++;
+  void game_increment() {
+    _gameNum++;
     notifyListeners(); //must be inserted
   }
 
-  void now_decrement() {
-    _nowNum--;
+  void game_decrement() {
+    _gameNum--;
     notifyListeners(); //must be inserted
   }
 

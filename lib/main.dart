@@ -56,7 +56,7 @@ class ShopList extends StatelessWidget {
             trailing: Column(
               children: [
                 Text('예약자 : ${_shopdata.getReserveNum()}명'),
-                Text('게임인원 : ${_shopdata.getNowNum()}명'),
+                Text('게임인원 : ${_shopdata.getGameNum()}명'),
               ],
             ),
             onTap: () {
@@ -73,7 +73,7 @@ class ShopList extends StatelessWidget {
             trailing: Column(
               children: [
                 Text('예약자 : ${_shopdata.getReserveNum()}명'),
-                Text('게임인원 : ${_shopdata.getNowNum()}명'),
+                Text('게임인원 : ${_shopdata.getGameNum()}명'),
               ],
             ),
             onTap: () {

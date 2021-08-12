@@ -125,7 +125,7 @@ class _ShopInformationState extends State<ShopInformation> {
                     ),) : Text(''),
                   ],
                 ),
-                Text('현재인원 : ${_shopData.getNowNum()}명'),
+                Text('현재인원 : ${_shopData.getGameNum()}명'),
               ],
             ),
           ),
