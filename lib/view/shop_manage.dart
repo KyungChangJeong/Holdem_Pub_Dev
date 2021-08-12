@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:holdem_pub/model/ShopData.dart';
 import 'package:holdem_pub/view/shop_manage_setting.dart';
-import 'package:holdem_pub/view/shop.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -251,7 +251,11 @@ class _ShopManageState extends State<ShopManage> {
                             },
                           ),
                         ),
-                        TextButton(onPressed: () {}, child: Text('저장'))
+                        TextButton(onPressed: () {
+                          CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+
+                        }, child: Text('저장'))
                       ],
                     ),
 

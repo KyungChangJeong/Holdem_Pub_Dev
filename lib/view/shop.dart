@@ -134,17 +134,20 @@ class _ShopInformationState extends State<ShopInformation> {
               children: [
                 // https://pub.dev/packages/kakaomap_webview
                 KakaoMapView(
+                    // 마커이름 표시
+                    overlayText: '사무실',
                     width: 300,
                     height: 200,
                     kakaoMapKey: kakaoMapKey,
                     // 좌표 설정
-                    lat: 33.450701,
-                    lng: 126.570667,
+                    lat: 36.62542465863818,
+                    lng: 127.44924449944767,
                     showMapTypeControl: true,
-                    // showZoomControl: true,
+                    showZoomControl: false,
                     markerImageURL:
                         'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
-                    onTapMarker: (message) async {}),
+                    onTapMarker: (message) async {
+                    }),
               ],
             ),
           ),
