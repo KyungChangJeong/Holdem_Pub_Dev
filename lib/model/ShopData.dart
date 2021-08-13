@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShopData with ChangeNotifier {
+  final _firestoreInstance = FirebaseFirestore.instance;
+
   String shopName = "테스트";
   String shopImage = "https://picsum.photos/250?image=9";
   String _shopInfo = "테스트 1";

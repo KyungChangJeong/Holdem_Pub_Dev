@@ -32,6 +32,8 @@ class _ShopManageState extends State<ShopManage> {
   // Dialog 이름 컨트롤러
   final _dialogtextFieldController = TextEditingController();
 
+  final firestoreInstance = FirebaseFirestore.instance;
+
   @override
   void initState() {}
 
@@ -45,41 +47,39 @@ class _ShopManageState extends State<ShopManage> {
   Widget build(BuildContext context) {
     ShopData _shopData = Provider.of<ShopData>(context);
 
-    void _showMaterialDialog(String status, int index) {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('상태 변경'),
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      // 예약 => 게임
-                      setState(() {
-                        // ReserveUser에서 status 삭제
-                        ReserveUser.removeAt(index);
-                        _shopData.reserve_decrement();
-
-                        // GameUser에 status 추가
-                        GameUser.add(status);
-                        _shopData.game_increment();
-                      });
-                      print('대기인원 : ${ReserveUser}');
-                      print('현재인원 : ${GameUser}');
-
-                      Navigator.pop(context);
-                    },
-                    child: Text('수락')),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('취소'),
-                )
-              ],
-            );
-          });
-    }
+    // void _showMaterialDialog(String status, int index) {
+    //   showDialog(
+    //       context: context,
+    //       builder: (context) {
+    //         return AlertDialog(
+    //           title: Text('상태 변경'),
+    //           actions: <Widget>[
+    //             TextButton(
+    //                 onPressed: () {
+    //                   // 예약 => 게임
+    //                   setState(() {
+    //                     // ReserveUser에서 status 삭제
+    //                     ReserveUser.removeAt(index);
+    //                     _shopData.reserve_decrement();
+    //
+    //                     // GameUser에 status 추가
+    //                     GameUser.add(status);
+    //                     _shopData.game_increment();
+    //                   });
+    //
+    //                   Navigator.pop(context);
+    //                 },
+    //                 child: Text('수락')),
+    //             TextButton(
+    //               onPressed: () {
+    //                 Navigator.pop(context);
+    //               },
+    //               child: Text('취소'),
+    //             )
+    //           ],
+    //         );
+    //       });
+    // }
 
     void _reserveAddUserDialog() async {
       return showDialog(
@@ -98,6 +98,19 @@ class _ShopManageState extends State<ShopManage> {
                   onPressed: () {
                     // ReserveUser
                     temp = _dialogtextFieldController.text;
+                    firestoreInstance
+                        .collection('Shop')
+                        // 가게이름
+                        .doc('jackpotrounge')
+                        // 게임별 인덱스 설정
+                        .collection('Games')
+                        .doc('Game1')
+                        .collection('ReserveList')
+                        .doc('$temp')
+                        .set({
+                      "name": "$temp",
+                    }).then((value) => print('예약자 DB 저장 성공'));
+
                     setState(() {
                       _shopData.reserve_increment();
                       ReserveUser.add(temp);
@@ -109,6 +122,7 @@ class _ShopManageState extends State<ShopManage> {
             );
           });
     }
+
     void _reserveUpdateUserDialog(int index) async {
       return showDialog(
           context: context,
@@ -126,6 +140,20 @@ class _ShopManageState extends State<ShopManage> {
                   onPressed: () {
                     // ReserveUser
                     temp = _dialogtextFieldController.text;
+                    /// 수정 에러 발생
+                    /// doc에서 이름을 한번 변경시 추적이 안되는 문제 발생
+                    // firestoreInstance
+                    //     .collection('Shop')
+                    //     // 가게이름
+                    //     .doc('jackpotrounge')
+                    //     // 게임별 인덱스 설정
+                    //     .collection('Games')
+                    //     .doc('Game1')
+                    //     .collection('ReserveList')
+                    //     .doc('${ReserveUser[index]}')
+                    //     .update({
+                    //   "name": "$temp",
+                    // }).then((value) => print('예약자 DB 저장 성공'));
                     setState(() {
                       ReserveUser[index] = temp;
                     });
@@ -154,6 +182,20 @@ class _ShopManageState extends State<ShopManage> {
                   onPressed: () {
                     // GameUser
                     temp = _dialogtextFieldController.text;
+
+                    /// DB 저장
+                    firestoreInstance
+                        .collection('Shop')
+                        // 가게이름
+                        .doc('jackpotrounge')
+                        // 게임별 인덱스 설정
+                        .collection('Games')
+                        .doc('Game1')
+                        .collection('GameList')
+                        .doc('$temp')
+                        .set({
+                      "name": "$temp",
+                    }).then((value) => print('게임 인원 저장'));
                     setState(() {
                       _shopData.game_increment();
                       GameUser.add(temp);
@@ -165,6 +207,7 @@ class _ShopManageState extends State<ShopManage> {
             );
           });
     }
+
     void _nowUserUpdateUserDialog(int index) async {
       return showDialog(
           context: context,
@@ -182,6 +225,21 @@ class _ShopManageState extends State<ShopManage> {
                   onPressed: () {
                     // ReserveUser
                     temp = _dialogtextFieldController.text;
+
+                    /// 수정 에러 발생
+                    /// doc에서 이름을 한번 변경시 추적이 안되는 문제 발생
+                    // firestoreInstance
+                    //     .collection('Shop')
+                    //     // 가게이름
+                    //     .doc('jackpotrounge')
+                    //     // 게임별 인덱스 설정
+                    //     .collection('Games')
+                    //     .doc('Game1')
+                    //     .collection('GameList')
+                    //     .doc('${GameUser[index]}')
+                    //     .update({
+                    //   "name": "$temp",
+                    // }).then((value) => print('게임인원 변경'));
                     setState(() {
                       GameUser[index] = temp;
                     });
@@ -193,6 +251,7 @@ class _ShopManageState extends State<ShopManage> {
           });
     }
 
+    // SnackBar
     void _showSnackBar(BuildContext context, String text) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -245,17 +304,18 @@ class _ShopManageState extends State<ShopManage> {
                               border: OutlineInputBorder(),
                               labelText: "소개글",
                             ),
-
                             onChanged: (text) {
                               _shopData.changeInfo(text);
                             },
                           ),
                         ),
-                        TextButton(onPressed: () {
-                          CollectionReference users = FirebaseFirestore.instance.collection('users');
-
-
-                        }, child: Text('저장'))
+                        TextButton(
+                            onPressed: () {
+                              CollectionReference users = FirebaseFirestore
+                                  .instance
+                                  .collection('users');
+                            },
+                            child: Text('저장'))
                       ],
                     ),
 
@@ -329,15 +389,6 @@ class _ShopManageState extends State<ShopManage> {
                       ),
                     ),
 
-                    // 주소 입력 => 지도로 변환
-                    Container(),
-
-                    // slidable Test
-                    Container(
-                      // child:  Orientation,
-
-                    ),
-
                     // 예약인원 설정 및 현재인원 설정 버튼
                     Container(
                       decoration: BoxDecoration(
@@ -359,7 +410,7 @@ class _ShopManageState extends State<ShopManage> {
                                 );
                               },
                               child: Text('게임 예약 설정')),
-                          // TextButton(onPressed: () {}, child: Text('현재 인원 설정')),
+
                         ],
                       ),
                     ),
@@ -430,14 +481,37 @@ class _ShopManageState extends State<ShopManage> {
 
                                           setState(() {
                                             // GameUser에 status 추가
+                                            firestoreInstance
+                                                .collection('Shop')
+                                                // 가게이름
+                                                .doc('jackpotrounge')
+                                                // 게임별 인덱스 설정
+                                                .collection('Games')
+                                                .doc('Game1')
+                                                .collection('GameList')
+                                                .doc('${ReserveUser[index]}')
+                                                .set({
+                                              "name": "$ReserveUser[index]"
+                                            }).then((_) => print('대기 인원 삭제'));
                                             GameUser.add(ReserveUser[index]);
+
                                             // ReserveUser에서 status 삭제
+                                            firestoreInstance
+                                                .collection('Shop')
+                                                // 가게이름
+                                                .doc('jackpotrounge')
+                                                // 게임별 인덱스 설정
+                                                .collection('Games')
+                                                .doc('Game1')
+                                                .collection('ReserveList')
+                                                .doc('${ReserveUser[index]}')
+                                                .delete()
+                                                .then((_) => print('대기 인원 삭제'));
                                             ReserveUser.removeAt(index);
                                             _shopData.reserve_decrement();
                                             _shopData.game_increment();
                                           });
-                                        }
-                                    ),
+                                        }),
                                     IconSlideAction(
                                         caption: '정보수정',
                                         color: Colors.blue,
@@ -445,18 +519,27 @@ class _ShopManageState extends State<ShopManage> {
                                         onTap: () {
                                           _showSnackBar(context, '정보 수정');
                                           _reserveUpdateUserDialog(index);
-                                        }
-                                    ),
+                                        }),
                                     IconSlideAction(
-                                      caption: '삭제',
-                                      color: Colors.red,
-                                      icon: Icons.delete,
-                                      onTap: (){
-                                        _showSnackBar(context, '삭제');
-                                        ReserveUser.removeAt(index);
-                                        _shopData.reserve_decrement();
-                                      }
-                                    ),
+                                        caption: '삭제',
+                                        color: Colors.red,
+                                        icon: Icons.delete,
+                                        onTap: () {
+                                          _showSnackBar(context, '삭제');
+                                          firestoreInstance
+                                              .collection('Shop')
+                                              // 가게이름
+                                              .doc('jackpotrounge')
+                                              // 게임별 인덱스 설정
+                                              .collection('Games')
+                                              .doc('Game1')
+                                              .collection('ReserveList')
+                                              .doc('${ReserveUser[index]}')
+                                              .delete()
+                                              .then((_) => print('대기 인원 삭제'));
+                                          ReserveUser.removeAt(index);
+                                          _shopData.reserve_decrement();
+                                        }),
                                   ],
                                 );
                               },
@@ -503,6 +586,7 @@ class _ShopManageState extends State<ShopManage> {
                                     // trailing: Text(
                                     //     GameUser[index].toString()),
                                   ),
+
                                   /// 오른쪽 슬라이더블
                                   secondaryActions: <Widget>[
                                     // IconSlideAction(
@@ -529,18 +613,28 @@ class _ShopManageState extends State<ShopManage> {
                                         onTap: () {
                                           _showSnackBar(context, '정보 수정');
                                           _nowUserUpdateUserDialog(index);
-                                        }
-                                    ),
+
+                                        }),
                                     IconSlideAction(
                                         caption: '삭제',
                                         color: Colors.red,
                                         icon: Icons.delete,
-                                        onTap: (){
+                                        onTap: () {
                                           _showSnackBar(context, '삭제');
+                                          firestoreInstance
+                                              .collection('Shop')
+                                              // 가게이름
+                                              .doc('jackpotrounge')
+                                              // 게임별 인덱스 설정
+                                              .collection('Games')
+                                              .doc('Game1')
+                                              .collection('GameList')
+                                              .doc('${GameUser[index]}')
+                                              .delete()
+                                              .then((_) => print('게임 인원 삭제'));
                                           GameUser.removeAt(index);
                                           _shopData.game_decrement();
-                                        }
-                                    ),
+                                        }),
                                   ],
                                 );
                               },

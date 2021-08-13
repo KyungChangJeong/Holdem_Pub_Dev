@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:holdem_pub/model/ShopData.dart';
 import 'package:kakaomap_webview/kakaomap_webview.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShopInformation extends StatefulWidget {
   @override
@@ -11,16 +12,16 @@ class ShopInformation extends StatefulWidget {
 // Javascript Key
 const String kakaoMapKey = 'e281adbe18c6cce0487f2be5167a487c';
 
+// 페이지 이동시 예약을 했음에도 false로 변경되는 상황
+// DB에 넣든지, local data에 저장하던지 방법을 변경해야함
+bool game_set_flag = false;
+bool game_reserve_flag = false;
+
 class _ShopInformationState extends State<ShopInformation> {
   int reservation_people = 2;
   int now_people = 4;
 
-  // 페이지 이동시 예약을 했음에도 false로 변경되는 상황
-  // DB에 넣든지, local data에 저장하던지 방법을 변경해야함
-  bool game_set_flag = false;
-  bool game_reserve_flag = false;
-
-
+  final firestoreInstance = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -43,14 +44,33 @@ class _ShopInformationState extends State<ShopInformation> {
                   Navigator.pop(context, "OK");
                   setState(() {
                     // 예약 취소 상태
-                    if(game_reserve_flag){
+                    if (game_reserve_flag) {
                       _shopData.reserve_decrement();
+                      /// DB 사용자 예약 정보 삭제
+                      firestoreInstance
+                          .collection('Shop')
+                          .doc('jackpotrounge')
+                          .collection('Games')
+                          .doc('Game1')
+                          .collection('ReserveList')
+                          // 사용자 예약 개인정보 삭제
+                          .doc('Test2')
+                          .delete().then((_) => print('삭제 성공'));
                     }
                     // 예약 하기 상태
-                    else{
+                    else {
                       _shopData.reserve_increment();
                       /// DB 사용자의 예약 정보 등록하기
-                      // FireStore
+                      firestoreInstance
+                          .collection('Shop')
+                          .doc('jackpotrounge')
+                          .collection('Games')
+                          .doc('Game1')
+                          .collection('ReserveList')
+                          // 사용자 개인정보 예약자 현황에 넣기
+                          .doc('Test2').set({
+                        "name": "Test1",
+                      });
                     }
                     game_reserve_flag = !game_reserve_flag;
                   });
@@ -118,9 +138,14 @@ class _ShopInformationState extends State<ShopInformation> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('예약인원 : ${_shopData.getReserveNum()}명'),
-                    game_reserve_flag ? Text('  예약됨', style: TextStyle(
-                      color: Colors.red,
-                    ),) : Text(''),
+                    game_reserve_flag
+                        ? Text(
+                            '  예약됨',
+                            style: TextStyle(
+                              color: Colors.red,
+                            ),
+                          )
+                        : Text(''),
                   ],
                 ),
                 Text('현재인원 : ${_shopData.getGameNum()}명'),
@@ -146,8 +171,7 @@ class _ShopInformationState extends State<ShopInformation> {
                     showZoomControl: false,
                     markerImageURL:
                         'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
-                    onTapMarker: (message) async {
-                    }),
+                    onTapMarker: (message) async {}),
               ],
             ),
           ),
