@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:holdem_pub/view/shop_manage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShopManageSetting extends StatefulWidget {
   const ShopManageSetting({Key? key}) : super(key: key);
@@ -11,9 +11,11 @@ class ShopManageSetting extends StatefulWidget {
 }
 
 class _ShopManageSettingState extends State<ShopManageSetting> {
+
+  final firestoreInstance = FirebaseFirestore.instance;
   final _reserve_people = TextEditingController();
   String _selectedTime='';
-  DateTime _dateTime = DateTime.now();
+  late int gameIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,7 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
                 children: [
                   Text('예약가능 인원'),
                   Container(
+                    /// 10 이하의 숫자 만 입력 가능하도록 설정
                     child: TextField(
                       controller: _reserve_people,
                       keyboardType: TextInputType.number,
@@ -84,16 +87,41 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
             Container(
               child: TextButton(
                 child: Text('게임 활성화'),
-                onPressed: () {
-                  // print('reserve_people : ${_reserve_people.text.toString()}');
-                  // print(
-                  //     '_dateTime : ${_dateTime.hour.toString()}:${_dateTime.minute.toString()}');
+                onPressed: ()  {
+
+                  // 게임 몇개 설정되있는지
+                  firestoreInstance.collection('Shop').doc('jackpotrounge').get().then((value) {
+                    gameIndex = (value.data())!['gameSetting'];
+                    print('gameIndex : $gameIndex');
+                  },);
+                  gameIndex++;
+                  
+                  // 설정된 게임 수 DB 저장
+                  firestoreInstance
+                      .collection('Shop')
+                      .doc('jackpotrounge')
+                      .update({
+                    "gameSetting": gameIndex,
+                  });
+                  
+                  // 게임 추가 설정
+                  firestoreInstance
+                      .collection('Shop')
+                      .doc('jackpotrounge')
+                      .collection('Games')
+                      .doc('Game$gameIndex')
+                      .set({
+                    "게임인원": _reserve_people.text,
+                    "게임시작시간" :_selectedTime,
+                  });
+
+                 
+
 
                   //게임 추가
                   GameList.add(
                       GameListData(_reserve_people.text ,_selectedTime)
                   );
-                  print('GameList: ${GameList.runtimeType}');
                   // 데이터 값 넘겨주기
                   Navigator.pop(context,true);
                 },

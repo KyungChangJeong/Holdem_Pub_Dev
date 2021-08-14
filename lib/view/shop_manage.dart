@@ -16,11 +16,9 @@ var ReserveUser = [];
 var GameUser = [];
 var GameList = [];
 
-class GameListData{
+class GameListData {
   late String reserveNum;
   late String time;
-
-
 
   GameListData(this.reserveNum, this.time);
 }
@@ -438,30 +436,63 @@ class _ShopManageState extends State<ShopManage> {
                       child: Column(
                         children: [
                           Text('생성 게임 목록'),
-                          Container(
-                            height: 400,
-                            child: new ListView.builder(
-                              padding: const EdgeInsets.all(5),
-                              itemCount: GameList.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return new ListTile(
-                                  onTap: () {
-                                    // 예약자 목록 / 현재 목록 설정으로 이동
-                                    // Navigator
-                                  },
-                                  leading: Icon(Icons.games),
-                                  title: Text("게임 $index"),
-                                  trailing: Column(
-                                    children: [
-                                      Text("예약 가능 인원 : ${GameList[index].reserveNum}"),
-                                      Text("게임 시간 : ${GameList[index].time}"),
-                                    ],
+                          StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('Shop')
+                                  .doc('jackpotrounge')
+                                  .collection('Games')
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData)
+                                  return Text("생성된 게임이 없습니다!");
+                                return Container(
+                                  height: 300,
+                                  child: new ListView.builder(
+                                    itemCount: snapshot.data!.docs.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return new ListTile(
+                                        onTap: () {
+                                          // 예약자 목록 / 현재 목록 설정으로 이동
+                                          // Navigator
+                                        },
+                                        leading: Icon(Icons.games),
+                                        title: Text(
+                                            "${snapshot.data!.docs[index].id}"),
+                                        subtitle: Text('${snapshot.data!.docs[index].get('게임시작시간')}'),
+                                        trailing: Container(
+                                          child: Text(
+                                              "예약 가능 인원 : ${snapshot.data!.docs[index].get('게임인원')}"),
+                                        ),
+                                      );
+                                    },
                                   ),
-
                                 );
-                              },
-                            ),
-                          ),
+                              }),
+                          // Container(
+                          //   height: 400,
+                          //   child: new ListView.builder(
+                          //     padding: const EdgeInsets.all(5),
+                          //     itemCount: GameList.length,
+                          //     itemBuilder: (BuildContext context, int index) {
+                          //       return new ListTile(
+                          //         onTap: () {
+                          //           // 예약자 목록 / 현재 목록 설정으로 이동
+                          //           // Navigator
+                          //         },
+                          //         leading: Icon(Icons.games),
+                          //         title: Text("게임 $index"),
+                          //         trailing: Column(
+                          //           children: [
+                          //             Text("예약 가능 인원 : ${GameList[index].reserveNum}"),
+                          //             Text("게임 시간 : ${GameList[index].time}"),
+                          //           ],
+                          //         ),
+                          //
+                          //       );
+                          //     },
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -534,9 +565,9 @@ class _ShopManageState extends State<ShopManage> {
                                             // GameUser에 status 추가
                                             firestoreInstance
                                                 .collection('Shop')
-                                            // 가게이름
+                                                // 가게이름
                                                 .doc('jackpotrounge')
-                                            // 게임별 인덱스 설정
+                                                // 게임별 인덱스 설정
                                                 .collection('Games')
                                                 .doc('Game1')
                                                 .collection('GameList')
@@ -549,9 +580,9 @@ class _ShopManageState extends State<ShopManage> {
                                             // ReserveUser에서 status 삭제
                                             firestoreInstance
                                                 .collection('Shop')
-                                            // 가게이름
+                                                // 가게이름
                                                 .doc('jackpotrounge')
-                                            // 게임별 인덱스 설정
+                                                // 게임별 인덱스 설정
                                                 .collection('Games')
                                                 .doc('Game1')
                                                 .collection('ReserveList')
@@ -579,9 +610,9 @@ class _ShopManageState extends State<ShopManage> {
                                           _showSnackBar(context, '삭제');
                                           firestoreInstance
                                               .collection('Shop')
-                                          // 가게이름
+                                              // 가게이름
                                               .doc('jackpotrounge')
-                                          // 게임별 인덱스 설정
+                                              // 게임별 인덱스 설정
                                               .collection('Games')
                                               .doc('Game1')
                                               .collection('ReserveList')
@@ -673,9 +704,9 @@ class _ShopManageState extends State<ShopManage> {
                                           _showSnackBar(context, '삭제');
                                           firestoreInstance
                                               .collection('Shop')
-                                          // 가게이름
+                                              // 가게이름
                                               .doc('jackpotrounge')
-                                          // 게임별 인덱스 설정
+                                              // 게임별 인덱스 설정
                                               .collection('Games')
                                               .doc('Game1')
                                               .collection('GameList')
