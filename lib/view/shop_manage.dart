@@ -14,6 +14,16 @@ class ShopManage extends StatefulWidget {
 
 var ReserveUser = [];
 var GameUser = [];
+var GameList = [];
+
+class GameListData{
+  late String reserveNum;
+  late String time;
+
+
+
+  GameListData(this.reserveNum, this.time);
+}
 
 class _ShopManageState extends State<ShopManage> {
   // Radio ListTile구현
@@ -140,6 +150,7 @@ class _ShopManageState extends State<ShopManage> {
                   onPressed: () {
                     // ReserveUser
                     temp = _dialogtextFieldController.text;
+
                     /// 수정 에러 발생
                     /// doc에서 이름을 한번 변경시 추적이 안되는 문제 발생
                     // firestoreInstance
@@ -410,7 +421,47 @@ class _ShopManageState extends State<ShopManage> {
                                 );
                               },
                               child: Text('게임 예약 설정')),
+                        ],
+                      ),
+                    ),
 
+                    // 생성된 게임 목록
+                    // shop_manage_setting에서 값 변경시 shop_manage화면에 즉시 변경 안됨
+                    // 해결방법 => Firebase DB에서 값 추가를 snapshot으로 읽어 빌드
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 1,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Text('생성 게임 목록'),
+                          Container(
+                            height: 400,
+                            child: new ListView.builder(
+                              padding: const EdgeInsets.all(5),
+                              itemCount: GameList.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return new ListTile(
+                                  onTap: () {
+                                    // 예약자 목록 / 현재 목록 설정으로 이동
+                                    // Navigator
+                                  },
+                                  leading: Icon(Icons.games),
+                                  title: Text("게임 $index"),
+                                  trailing: Column(
+                                    children: [
+                                      Text("예약 가능 인원 : ${GameList[index].reserveNum}"),
+                                      Text("게임 시간 : ${GameList[index].time}"),
+                                    ],
+                                  ),
+
+                                );
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -483,9 +534,9 @@ class _ShopManageState extends State<ShopManage> {
                                             // GameUser에 status 추가
                                             firestoreInstance
                                                 .collection('Shop')
-                                                // 가게이름
+                                            // 가게이름
                                                 .doc('jackpotrounge')
-                                                // 게임별 인덱스 설정
+                                            // 게임별 인덱스 설정
                                                 .collection('Games')
                                                 .doc('Game1')
                                                 .collection('GameList')
@@ -498,9 +549,9 @@ class _ShopManageState extends State<ShopManage> {
                                             // ReserveUser에서 status 삭제
                                             firestoreInstance
                                                 .collection('Shop')
-                                                // 가게이름
+                                            // 가게이름
                                                 .doc('jackpotrounge')
-                                                // 게임별 인덱스 설정
+                                            // 게임별 인덱스 설정
                                                 .collection('Games')
                                                 .doc('Game1')
                                                 .collection('ReserveList')
@@ -528,9 +579,9 @@ class _ShopManageState extends State<ShopManage> {
                                           _showSnackBar(context, '삭제');
                                           firestoreInstance
                                               .collection('Shop')
-                                              // 가게이름
+                                          // 가게이름
                                               .doc('jackpotrounge')
-                                              // 게임별 인덱스 설정
+                                          // 게임별 인덱스 설정
                                               .collection('Games')
                                               .doc('Game1')
                                               .collection('ReserveList')
@@ -613,7 +664,6 @@ class _ShopManageState extends State<ShopManage> {
                                         onTap: () {
                                           _showSnackBar(context, '정보 수정');
                                           _nowUserUpdateUserDialog(index);
-
                                         }),
                                     IconSlideAction(
                                         caption: '삭제',
@@ -623,9 +673,9 @@ class _ShopManageState extends State<ShopManage> {
                                           _showSnackBar(context, '삭제');
                                           firestoreInstance
                                               .collection('Shop')
-                                              // 가게이름
+                                          // 가게이름
                                               .doc('jackpotrounge')
-                                              // 게임별 인덱스 설정
+                                          // 게임별 인덱스 설정
                                               .collection('Games')
                                               .doc('Game1')
                                               .collection('GameList')

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
+import 'package:holdem_pub/view/shop_manage.dart';
 
 class ShopManageSetting extends StatefulWidget {
   const ShopManageSetting({Key? key}) : super(key: key);
@@ -61,7 +62,7 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
                               selectedTime.then((timeOfDay) {
                                 setState(() {
                                   _selectedTime =
-                                      '${timeOfDay!.hour}:${timeOfDay!.minute}';
+                                      '${timeOfDay!.hour}:${timeOfDay.minute}';
                                   print('_selectedTime : $_selectedTime');
                                 });
                               });
@@ -84,11 +85,17 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
               child: TextButton(
                 child: Text('게임 활성화'),
                 onPressed: () {
-                  print('reserve_people : ${_reserve_people.text.toString()}');
-                  print(
-                      '_dateTime : ${_dateTime.hour.toString()}:${_dateTime.minute.toString()}');
+                  // print('reserve_people : ${_reserve_people.text.toString()}');
+                  // print(
+                  //     '_dateTime : ${_dateTime.hour.toString()}:${_dateTime.minute.toString()}');
+
+                  //게임 추가
+                  GameList.add(
+                      GameListData(_reserve_people.text ,_selectedTime)
+                  );
+                  print('GameList: ${GameList.runtimeType}');
                   // 데이터 값 넘겨주기
-                  Navigator.pop(context);
+                  Navigator.pop(context,true);
                 },
               ),
             ),
