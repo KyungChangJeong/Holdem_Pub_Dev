@@ -451,48 +451,75 @@ class _ShopManageState extends State<ShopManage> {
                                     itemCount: snapshot.data!.docs.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
-                                      return new ListTile(
-                                        onTap: () {
-                                          // 예약자 목록 / 현재 목록 설정으로 이동
-                                          // Navigator
-                                        },
-                                        leading: Icon(Icons.games),
-                                        title: Text(
-                                            "${snapshot.data!.docs[index].id}"),
-                                        subtitle: Text('${snapshot.data!.docs[index].get('게임시작시간')}'),
-                                        trailing: Container(
-                                          child: Text(
-                                              "예약 가능 인원 : ${snapshot.data!.docs[index].get('게임인원')}"),
+                                      return Slidable(
+                                        actionPane: SlidableDrawerActionPane(),
+                                        actionExtentRatio: 0.25,
+                                        child: new ListTile(
+                                          onTap: () {
+                                            // 예약자 목록 / 현재 목록 설정으로 이동
+                                            // Navigator
+                                          },
+                                          leading: Icon(Icons.games),
+                                          // DB 문서 이름
+                                          title: Text(
+                                              "${snapshot.data!.docs[index].id}"),
+                                          subtitle: Text('${snapshot.data!.docs[index].get('게임시작시간')}'),
+                                          trailing: Container(
+                                            child: Text(
+                                                "예약 가능 인원 : ${snapshot.data!.docs[index].get('게임인원')}"),
+                                          ),
                                         ),
+                                        /// 오른쪽 슬라이더블
+                                        secondaryActions: <Widget>[
+                                          IconSlideAction(
+                                              caption: '예약관리',
+                                              color: Colors.black45,
+                                              icon: Icons.move_to_inbox,
+                                              onTap: () {
+                                                _showSnackBar(context, '예약 관리');
+
+                                              }),
+                                          IconSlideAction(
+                                              caption: '정보수정',
+                                              color: Colors.blue,
+                                              icon: Icons.update,
+                                              onTap: () {
+                                                _showSnackBar(context, '게임 정보 수정');
+                                                firestoreInstance
+                                                    .collection('Shop')
+                                                // 가게이름
+                                                    .doc('jackpotrounge')
+                                                // 게임별 인덱스 설정
+                                                    .collection('Games')
+                                                    .doc('${snapshot.data!.docs[index].id}')
+                                                    .update({
+                                                  "게임시작시간": "19:00",
+                                                });
+                                              }),
+                                          IconSlideAction(
+                                              caption: '삭제',
+                                              color: Colors.red,
+                                              icon: Icons.delete,
+                                              onTap: () {
+                                                // _showSnackBar(context, '정보 수정');
+                                                _showSnackBar(context, "${snapshot.data!.docs[index].id}");
+
+
+                                                firestoreInstance
+                                                    .collection('Shop')
+                                                // 가게이름
+                                                    .doc('jackpotrounge')
+                                                // 게임별 인덱스 설정
+                                                    .collection('Games')
+                                                    .doc('${snapshot.data!.docs[index].id}')
+                                                    .delete();
+                                              }),
+                                        ],
                                       );
                                     },
                                   ),
                                 );
                               }),
-                          // Container(
-                          //   height: 400,
-                          //   child: new ListView.builder(
-                          //     padding: const EdgeInsets.all(5),
-                          //     itemCount: GameList.length,
-                          //     itemBuilder: (BuildContext context, int index) {
-                          //       return new ListTile(
-                          //         onTap: () {
-                          //           // 예약자 목록 / 현재 목록 설정으로 이동
-                          //           // Navigator
-                          //         },
-                          //         leading: Icon(Icons.games),
-                          //         title: Text("게임 $index"),
-                          //         trailing: Column(
-                          //           children: [
-                          //             Text("예약 가능 인원 : ${GameList[index].reserveNum}"),
-                          //             Text("게임 시간 : ${GameList[index].time}"),
-                          //           ],
-                          //         ),
-                          //
-                          //       );
-                          //     },
-                          //   ),
-                          // ),
                         ],
                       ),
                     ),

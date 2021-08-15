@@ -1,3 +1,4 @@
+import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:holdem_pub/model/ShopData.dart';
 import 'package:kakaomap_webview/kakaomap_webview.dart';
@@ -23,10 +24,36 @@ class _ShopInformationState extends State<ShopInformation> {
 
   final firestoreInstance = FirebaseFirestore.instance;
 
+  // FB Shop DB
+  late String ShopName;
+  late String ShopInfo;
+  late String ShopLogo;
+  late var ShopLocation;
   @override
   Widget build(BuildContext context) {
     ShopData _shopData = Provider.of<ShopData>(context);
 
+    /// FB Data 불러오기 But 초기화 문제 발생
+    // firestoreInstance
+    //     .collection('Shop')
+    //     .where('shop_name', isEqualTo: 'jackpotrounge')
+    //     .get()
+    //     .then((value) {
+    //   value.docs.forEach((result) {
+    //     ShopName = result.data()['shop_name'];
+    //     ShopLogo = result.data()['shop_logo'];
+    //     ShopInfo = result.data()['shop_info'];
+    //     ShopLocation = result.data()['location'];
+    //     // print("DB : ${result.data()['shop_name']}");
+    //     // print("DB Location : ${result.data()['location']['latitude']}");
+    //     print("ShopLocation : ${ShopLocation.latitude.toString()}");
+    //     print("ShopLocation : ${ShopLocation.longitude.toString()}");
+    //   });
+    // });
+
+    // print('temp: $shopDB');
+    // print('temp[key]: ${shopDB['shop_name']}');
+    /// 이거 일단 사용 안함
     void showAlertDialog(BuildContext context) async {
       String result = await showDialog(
         context: context,
@@ -46,6 +73,7 @@ class _ShopInformationState extends State<ShopInformation> {
                     // 예약 취소 상태
                     if (game_reserve_flag) {
                       _shopData.reserve_decrement();
+
                       /// DB 사용자 예약 정보 삭제
                       firestoreInstance
                           .collection('Shop')
@@ -55,11 +83,13 @@ class _ShopInformationState extends State<ShopInformation> {
                           .collection('ReserveList')
                           // 사용자 예약 개인정보 삭제
                           .doc('Test2')
-                          .delete().then((_) => print('삭제 성공'));
+                          .delete()
+                          .then((_) => print('삭제 성공'));
                     }
                     // 예약 하기 상태
                     else {
                       _shopData.reserve_increment();
+
                       /// DB 사용자의 예약 정보 등록하기
                       firestoreInstance
                           .collection('Shop')
@@ -68,7 +98,8 @@ class _ShopInformationState extends State<ShopInformation> {
                           .doc('Game1')
                           .collection('ReserveList')
                           // 사용자 개인정보 예약자 현황에 넣기
-                          .doc('Test2').set({
+                          .doc('Test2')
+                          .set({
                         "name": "Test1",
                       });
                     }
@@ -102,7 +133,7 @@ class _ShopInformationState extends State<ShopInformation> {
             // 매장 이름
             child: Center(
                 child: Text(
-              '${_shopData.shopName}(사용자)',
+              '${ShopName}(사용자)',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             )),
           ),
@@ -112,8 +143,8 @@ class _ShopInformationState extends State<ShopInformation> {
               children: [
                 // Storage 이미지 저장 => FireStore 이미지 경로
                 // Image
-                Image.network('https://picsum.photos/250?image=9'),
-                Text('소개글 : ${_shopData.getInfo()}'),
+                Image.network('$ShopLogo'),
+                Text('소개글 : ${ShopInfo}'),
               ],
             ),
           ),
@@ -165,6 +196,8 @@ class _ShopInformationState extends State<ShopInformation> {
                     height: 200,
                     kakaoMapKey: kakaoMapKey,
                     // 좌표 설정
+                    // lat: ShopLocation.latitude,
+                    // lng: ShopLocation.latitude,
                     lat: 36.62542465863818,
                     lng: 127.44924449944767,
                     showMapTypeControl: true,
