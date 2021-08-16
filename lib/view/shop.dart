@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShopInformation extends StatefulWidget {
+
+
   @override
   _ShopInformationState createState() => _ShopInformationState();
 }
@@ -25,19 +27,13 @@ class _ShopInformationState extends State<ShopInformation> {
   final firestoreInstance = FirebaseFirestore.instance;
 
   // FB Shop DB
-  late String ShopName="";
-  late String ShopInfo="";
-  late String ShopLogo="";
+  late String ShopName = "";
+  late String ShopInfo = "";
+  late String ShopLogo = "";
   late var ShopLocation;
-
-
 
   @override
   void initState() {
-    /// FB Data 불러오기 But 초기화 문제 발생
-
-    // print('temp: $shopDB');
-    // print('temp[key]: ${shopDB['shop_name']}');
 
     // 로직상 문제 발견 => 이전 페이지에서 해당 데이터 넘겨줘서 읽어들여야 됨
     firestoreInstance
@@ -50,18 +46,15 @@ class _ShopInformationState extends State<ShopInformation> {
         ShopLogo = result.data()['shop_logo'];
         ShopInfo = result.data()['shop_info'];
         ShopLocation = result.data()['location'];
-
       });
     });
 
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     ShopData _shopData = Provider.of<ShopData>(context);
-
 
     /// 이거 일단 사용 안함
     void showAlertDialog(BuildContext context) async {
@@ -137,114 +130,128 @@ class _ShopInformationState extends State<ShopInformation> {
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         children: [
-          Container(
-            width: 200,
-            height: 100,
-            // 매장 이름
-            child: Center(
-                child: Text(
-              '${ShopName}(사용자)',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            )),
-          ),
-          Container(
-            // 로고 /  소개글
-            child: Column(
-              children: [
-                // Storage 이미지 저장 => FireStore 이미지 경로
-                // Image
-                Image.network('$ShopLogo'),
-                Text('소개글 : ${ShopInfo}'),
-              ],
-            ),
-          ),
-          Container(
-            // 게임중 / 대기중 / 오픈 / 마감 화면
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // 게임중 / 게임 대기중
-                game_set_flag ? Text('게임중') : Text('게임 대기중'),
-
-                // 오픈 or 마감
-                Icon(Icons.fire_extinguisher),
-              ],
-            ),
-          ),
-          Container(
-            // 현재인원 / 예약자
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+              // 선택한 리스트 ID 메인에서 넘기기 => isEqualTo 값 넣어주기
+                  .collection('Shop').where('shop_name',isEqualTo: "jackpotrounge")
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return Text("게임 정보가 없습니다.");
+                return Column(
                   children: [
-                    Text('예약인원 : ${_shopData.getReserveNum()}명'),
-                    game_reserve_flag
-                        ? Text(
-                            '  예약됨',
-                            style: TextStyle(
-                              color: Colors.red,
-                            ),
-                          )
-                        : Text(''),
+                    Container(
+                      width: 200,
+                      height: 100,
+                      // 매장 이름
+                      child: Center(
+                          child: Text(
+                        '${snapshot.data!.docs[0].get('shop_name')}(사용자)',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      )),
+                    ),
+                    Container(
+                      // 로고 /  소개글
+                      child: Column(
+                        children: [
+                          // Storage 이미지 저장 => FireStore 이미지 경로
+                          // Image
+                          Image.network('${snapshot.data!.docs[0].get('shop_logo')}'),
+                          Text('소개글 : ${snapshot.data!.docs[0].get('shop_info')}'),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      // 게임중 / 대기중 / 오픈 / 마감 화면
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // 게임중 / 게임 대기중
+                          game_set_flag ? Text('게임중') : Text('게임 대기중'),
+
+                          // 오픈 or 마감
+                          Icon(Icons.fire_extinguisher),
+                        ],
+                      ),
+                    ),
+
+                    Container(
+                      // 현재인원 / 예약자
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('예약인원 : ${_shopData.getReserveNum()}명'),
+                              game_reserve_flag
+                                  ? Text(
+                                      '  예약됨',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                    )
+                                  : Text(''),
+                            ],
+                          ),
+                          Text('현재인원 : ${_shopData.getGameNum()}명'),
+                        ],
+                      ),
+                    ),
+                    // 지도 WebView
+                    Container(
+                      // 매장 위치
+                      child: Column(
+                        children: [
+                          // https://pub.dev/packages/kakaomap_webview
+                          KakaoMapView(
+                              // 마커이름 표시
+                              overlayText: '사무실',
+                              width: 300,
+                              height: 200,
+                              kakaoMapKey: kakaoMapKey,
+                              // 좌표 설정
+                              // lat: ShopLocation.latitude,
+                              // lng: ShopLocation.longitude,
+                              lat: snapshot.data!.docs[0].get('location').latitude,
+                              lng: snapshot.data!.docs[0].get('location').longitude,
+                              showMapTypeControl: true,
+                              showZoomControl: false,
+                              markerImageURL:
+                                  'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
+                              onTapMarker: (message) async {}),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        game_reserve_flag
+                            ?
+                            // 예약 취소
+                            TextButton(
+                                onPressed: () {
+                                  // 예약 취소 창
+                                  showAlertDialog(context);
+                                },
+                                child: Text('취소하기'))
+                            :
+                            // 예약 하기
+                            TextButton(
+                                onPressed: () {
+                                  // 예약 확인 창
+                                  showAlertDialog(context);
+                                },
+                                child: Text('예약하기')),
+                        TextButton(
+                            onPressed: () {
+                              // 채팅 페이지로
+                            },
+                            child: Text('채팅'))
+                      ],
+                    ),
                   ],
-                ),
-                Text('현재인원 : ${_shopData.getGameNum()}명'),
-              ],
-            ),
-          ),
-          // 지도 WebView
-          Container(
-            // 매장 위치
-            child: Column(
-              children: [
-                // https://pub.dev/packages/kakaomap_webview
-                KakaoMapView(
-                    // 마커이름 표시
-                    overlayText: '사무실',
-                    width: 300,
-                    height: 200,
-                    kakaoMapKey: kakaoMapKey,
-                    // 좌표 설정
-                    // lat: ShopLocation.latitude,
-                    // lng: ShopLocation.latitude,
-                    lat: 36.62542465863818,
-                    lng: 127.44924449944767,
-                    showMapTypeControl: true,
-                    showZoomControl: false,
-                    markerImageURL:
-                        'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
-                    onTapMarker: (message) async {}),
-              ],
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              game_reserve_flag
-                  ?
-                  // 예약 취소
-                  TextButton(
-                      onPressed: () {
-                        // 예약 취소 창
-                        showAlertDialog(context);
-                      },
-                      child: Text('취소하기'))
-                  :
-                  // 예약 하기
-                  TextButton(
-                      onPressed: () {
-                        // 예약 확인 창
-                        showAlertDialog(context);
-                      },
-                      child: Text('예약하기')),
-              TextButton(
-                  onPressed: () {
-                    // 채팅 페이지로
-                  },
-                  child: Text('채팅'))
-            ],
-          ),
+                );
+              }),
         ],
       ),
     );

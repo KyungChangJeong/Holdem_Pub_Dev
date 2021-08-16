@@ -226,7 +226,7 @@ class _GameReserveListState extends State<GameReserveList> {
                               icon: Icon(Icons.add)),
 
                           Container(
-                            height: 400,
+                            height: 300,
                             child: new ListView.builder(
                               padding: const EdgeInsets.all(8),
                               itemCount: snapshot.data!.docs.length,
@@ -350,7 +350,7 @@ class _GameReserveListState extends State<GameReserveList> {
                                   },
                                   icon: Icon(Icons.add)),
                               Container(
-                                height: 400,
+                                height: 300,
                                 child: new ListView.builder(
                                   padding: const EdgeInsets.all(8),
                                   itemCount: snapshot.data!.docs.length,
@@ -399,6 +399,17 @@ class _GameReserveListState extends State<GameReserveList> {
                                   },
                                 ),
                               ),
+
+                              // 게임 시작 버튼
+                              TextButton(onPressed: (){
+                                // 1. 상태 플래그 변화(DB -> {Games => 해당 게임 Flag변화})
+                                // 2. 예약 신청 못하게 표시
+                                // 3. 사용자 화면에서 변하게 변경
+                                
+                              }, child: Text('게임 시작',style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 20
+                              ),))
                             ],
                           );
                         }),
