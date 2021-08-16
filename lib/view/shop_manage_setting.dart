@@ -11,10 +11,10 @@ class ShopManageSetting extends StatefulWidget {
 }
 
 class _ShopManageSettingState extends State<ShopManageSetting> {
-
   final firestoreInstance = FirebaseFirestore.instance;
+  final _game_name = TextEditingController();
   final _reserve_people = TextEditingController();
-  String _selectedTime='';
+  String _selectedTime = '';
   late int gameIndex;
 
   @override
@@ -31,9 +31,21 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
             Container(
               child: Column(
                 children: [
+                  Text('게임 이름'),
+                  Container(
+                    /// 몇글자의 게임이름 작성가능할지 설정해야 함
+                    child: TextField(
+                      controller: _game_name,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        labelText: '게임 이름 설정',
+                        hintText: '이벤트 게임',
+                      ),
+                    ),
+                  ),
                   Text('예약가능 인원'),
                   Container(
-                    /// 10 이하의 숫자 만 입력 가능하도록 설정
+                    /// 10 이하의 숫자 만 입력 가능하도록 설정해야 함
                     child: TextField(
                       controller: _reserve_people,
                       keyboardType: TextInputType.number,
@@ -53,7 +65,10 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
             Container(
               child: Column(
                 children: [
-                  Text('게임 시작 시간 설정',style: TextStyle(fontSize: 20),),
+                  Text(
+                    '게임 시작 시간 설정',
+                    style: TextStyle(fontSize: 20),
+                  ),
                   Container(
                     child: Column(
                       children: <Widget>[
@@ -71,9 +86,14 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
                               });
                             },
                             child: Text('시작 시간 설정')),
-                          (_selectedTime =="") ? Text('게임 시작 시간 설정하세요') : Text('게임 시작 시간 : $_selectedTime'),
 
-
+                        // 설정된 게임 시간이 없으면
+                        (_selectedTime == "")
+                            ? Text('게임 시작 시간 설정하세요')
+                            : Text(
+                                '게임 시작 시간 : $_selectedTime',
+                                style: TextStyle(color: Colors.red),
+                              ),
                       ],
                     ),
                   )
@@ -81,21 +101,28 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
               ),
             ),
 
-            Container(),
+            SizedBox(
+              height: 50,
+            ),
 
             // 예약 설정 활성화 버튼
             Container(
               child: TextButton(
                 child: Text('게임 활성화'),
-                onPressed: ()  {
-
+                onPressed: () {
                   // 게임 몇개 설정되있는지
-                  firestoreInstance.collection('Shop').doc('jackpotrounge').get().then((value) {
-                    gameIndex = (value.data())!['gameSetting'];
-                    print('gameIndex : $gameIndex');
-                  },);
+                  firestoreInstance
+                      .collection('Shop')
+                      .doc('jackpotrounge')
+                      .get()
+                      .then(
+                    (value) {
+                      gameIndex = (value.data())!['gameSetting'];
+                      print('gameIndex : $gameIndex');
+                    },
+                  );
                   gameIndex++;
-                  
+
                   // 설정된 게임 수 DB 저장
                   firestoreInstance
                       .collection('Shop')
@@ -103,31 +130,26 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
                       .update({
                     "gameSetting": gameIndex,
                   });
-                  
+
                   // 게임 추가 설정
                   firestoreInstance
                       .collection('Shop')
                       .doc('jackpotrounge')
                       .collection('Games')
-                      .doc('Game$gameIndex')
+                      .doc('${_game_name.text}')
                       .set({
+                    "게임이름": _game_name.text,
                     "게임인원": _reserve_people.text,
-                    "게임시작시간" :_selectedTime,
+                    "게임시작시간": _selectedTime,
                   });
 
-                 
-
-
-                  //게임 추가
-                  GameList.add(
-                      GameListData(_reserve_people.text ,_selectedTime)
-                  );
                   // 데이터 값 넘겨주기
-                  Navigator.pop(context,true);
+                  Navigator.pop(context, true);
                 },
               ),
             ),
           ],
+
         ),
       ),
     );

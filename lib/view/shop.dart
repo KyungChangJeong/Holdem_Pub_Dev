@@ -25,34 +25,44 @@ class _ShopInformationState extends State<ShopInformation> {
   final firestoreInstance = FirebaseFirestore.instance;
 
   // FB Shop DB
-  late String ShopName;
-  late String ShopInfo;
-  late String ShopLogo;
+  late String ShopName="";
+  late String ShopInfo="";
+  late String ShopLogo="";
   late var ShopLocation;
+
+
+
+  @override
+  void initState() {
+    /// FB Data 불러오기 But 초기화 문제 발생
+
+    // print('temp: $shopDB');
+    // print('temp[key]: ${shopDB['shop_name']}');
+
+    // 로직상 문제 발견 => 이전 페이지에서 해당 데이터 넘겨줘서 읽어들여야 됨
+    firestoreInstance
+        .collection('Shop')
+        .where('shop_name', isEqualTo: 'jackpotrounge')
+        .get()
+        .then((value) {
+      value.docs.forEach((result) {
+        ShopName = result.data()['shop_name'];
+        ShopLogo = result.data()['shop_logo'];
+        ShopInfo = result.data()['shop_info'];
+        ShopLocation = result.data()['location'];
+
+      });
+    });
+
+    super.initState();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     ShopData _shopData = Provider.of<ShopData>(context);
 
-    /// FB Data 불러오기 But 초기화 문제 발생
-    // firestoreInstance
-    //     .collection('Shop')
-    //     .where('shop_name', isEqualTo: 'jackpotrounge')
-    //     .get()
-    //     .then((value) {
-    //   value.docs.forEach((result) {
-    //     ShopName = result.data()['shop_name'];
-    //     ShopLogo = result.data()['shop_logo'];
-    //     ShopInfo = result.data()['shop_info'];
-    //     ShopLocation = result.data()['location'];
-    //     // print("DB : ${result.data()['shop_name']}");
-    //     // print("DB Location : ${result.data()['location']['latitude']}");
-    //     print("ShopLocation : ${ShopLocation.latitude.toString()}");
-    //     print("ShopLocation : ${ShopLocation.longitude.toString()}");
-    //   });
-    // });
 
-    // print('temp: $shopDB');
-    // print('temp[key]: ${shopDB['shop_name']}');
     /// 이거 일단 사용 안함
     void showAlertDialog(BuildContext context) async {
       String result = await showDialog(
