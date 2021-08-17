@@ -25,6 +25,8 @@ class _GameReserveListState extends State<GameReserveList> {
 
   final firestoreInstance = FirebaseFirestore.instance;
 
+  CollectionReference users = FirebaseFirestore.instance.collection('Shop').doc('jackpotrounge').collection('Games');
+
   // SnackBar
   void _showSnackBar(BuildContext context, String text) {
     ScaffoldMessenger.of(context)
@@ -35,7 +37,7 @@ class _GameReserveListState extends State<GameReserveList> {
   @override
   Widget build(BuildContext context) {
     ShopData _shopData = Provider.of<ShopData>(context);
-    void _reserveAddUserDialog() async {
+    void _reserveAddUserDialog(int nowNum) async {
       return showDialog(
           context: context,
           builder: (context) {
@@ -54,32 +56,37 @@ class _GameReserveListState extends State<GameReserveList> {
                     temp = _dialogtextFieldController.text;
                     // 명단 DB List에 값 넣기
                     /// 버그발견 문서이름.set으로하면 해당문서가 아닌 동적 문서가 생성되어 관리 어려움 발생
-                    firestoreInstance
-                        .collection('Shop')
-                        // 가게이름
-                        .doc('jackpotrounge')
-                        // 게임별 인덱스 설정
-                        .collection('Games')
-                        .doc(widget.GameId)
-                        .collection('ReserveList')
-                        .doc(temp)
-                        .set({
-                      "name": "$temp",
-                    }).then((value) => print('예약자 DB 저장 성공'));
+                    ///
+                    users.doc(widget.GameId).collection('ReserveList').doc(temp).set(
+                        {
+                          "name": "$temp",
+                        });
 
-                    //
                     // firestoreInstance
                     //     .collection('Shop')
-                    // // 가게이름
+                    //     // 가게이름
                     //     .doc('jackpotrounge')
-                    // // 게임별 인덱스 설정
+                    //     // 게임별 인덱스 설정
                     //     .collection('Games')
                     //     .doc(widget.GameId)
-                    //     .get().then((value) {
-                    // print('value : ${value.data()}');
+                    //     .collection('ReserveList')
+                    //     .doc(temp)
+                    //     .set({
+                    //   "name": "$temp",
+                    //
+                    // }).then((value) => print('예약자 DB 저장 성공'));
+
+                    /// 버그 해결 후 현재인원 입력
+                    // firestoreInstance
+                    //     .collection('Shop')
+                    //     // 가게이름
+                    //     .doc('jackpotrounge')
+                    //     // 게임별 인덱스 설정
+                    //     .collection('Games')
+                    //     .doc(widget.GameId)
+                    //     .set({
+                    //   '예약인원': nowNum+1,
                     // });
-
-
 
                     // // 예약 + 버튼 눌렀을때 현재인원 변경
                     // reserveNum++;
@@ -95,7 +102,6 @@ class _GameReserveListState extends State<GameReserveList> {
                     // }).then((value) {
                     //   print("예약인원 reserveNum: $reserveNum");
                     // });
-
 
                     // firestoreInstance
                     //     .collection('Shop')
@@ -113,7 +119,6 @@ class _GameReserveListState extends State<GameReserveList> {
                     //     "name": "$temp",
                     //   }).then((value) => print('예약자 DB 저장 성공'));
                     // });
-
 
                     Navigator.of(context).pop();
                   },
@@ -272,7 +277,7 @@ class _GameReserveListState extends State<GameReserveList> {
                           IconButton(
                               onPressed: () {
                                 // 대기인원 명단 작성
-                                _reserveAddUserDialog();
+                                _reserveAddUserDialog(snapshot.data!.size);
                               },
                               icon: Icon(Icons.add)),
 
