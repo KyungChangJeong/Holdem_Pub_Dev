@@ -469,7 +469,7 @@ class _ShopManageState extends State<ShopManage> {
                                               '${snapshot.data!.docs[index].get('게임시작시간')}'),
                                           trailing: Container(
                                             child: Text(
-                                                "예약 가능 인원 : ${snapshot.data!.docs[index].get('게임인원')}"),
+                                                "예약 가능 인원 : ${snapshot.data!.docs[index].get('게임가능인원')}"),
                                           ),
                                         ),
 

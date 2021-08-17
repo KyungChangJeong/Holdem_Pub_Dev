@@ -67,6 +67,7 @@ class _GameReserveListState extends State<GameReserveList> {
                       "name": "$temp",
                     }).then((value) => print('예약자 DB 저장 성공'));
 
+                    //
                     // firestoreInstance
                     //     .collection('Shop')
                     // // 가게이름
@@ -75,10 +76,11 @@ class _GameReserveListState extends State<GameReserveList> {
                     //     .collection('Games')
                     //     .doc(widget.GameId)
                     //     .get().then((value) {
-                    //   reserveNum = value.data() as int;
-                    //   print("reserveNum: $reserveNum");
+                    // print('value : ${value.data()}');
                     // });
-                    //
+
+
+
                     // // 예약 + 버튼 눌렀을때 현재인원 변경
                     // reserveNum++;
                     // firestoreInstance
@@ -112,17 +114,6 @@ class _GameReserveListState extends State<GameReserveList> {
                     //   }).then((value) => print('예약자 DB 저장 성공'));
                     // });
 
-                    // Collection Filed 추가 및 인원 수 데이터 추가
-                    // firestoreInstance
-                    //     .collection('Shop')
-                    // // 가게이름
-                    //     .doc('jackpotrounge')
-                    // // 게임별 인덱스 설정
-                    //     .collection('Games')
-                    //     .doc('${widget.GameId}')
-                    //     .set({
-                    //   'ReserveNum': ' ',
-                    // });
 
                     Navigator.of(context).pop();
                   },

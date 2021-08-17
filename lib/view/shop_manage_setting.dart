@@ -136,7 +136,7 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
                       .collection('Shop')
                       .doc('jackpotrounge')
                       .collection('Games')
-                      .doc('${_game_name.text}')
+                      .doc(_game_name.text)
                       .set({
                     "게임이름": _game_name.text,
                     "게임가능인원": _reserve_people.text,

@@ -217,7 +217,7 @@ class _ShopInformationState extends State<ShopInformation> {
                                                     Icon(Icons.games_sharp),
                                                 title: Text('${snapshot.data!.docs[index].get('게임이름')}'),
                                                 subtitle: Text('${snapshot.data!.docs[index].get('게임시작시간')}'),
-                                                // trailing: Text('예약인원 : ${snapshot.data!.docs[index]}명'),
+                                                // trailing: Text('예약인원 : ${firestoreInstance.collection('Shop').doc('jackpotrounge').collection('Games').doc('${snapshot.data!.docs[index].get('게임이름')}').collection('ReserveList')}명'),
                                               );
                                             }),
                                       )
