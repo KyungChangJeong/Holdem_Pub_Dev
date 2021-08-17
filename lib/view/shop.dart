@@ -6,8 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShopInformation extends StatefulWidget {
-
-
   @override
   _ShopInformationState createState() => _ShopInformationState();
 }
@@ -34,7 +32,6 @@ class _ShopInformationState extends State<ShopInformation> {
 
   @override
   void initState() {
-
     // 로직상 문제 발견 => 이전 페이지에서 해당 데이터 넘겨줘서 읽어들여야 됨
     firestoreInstance
         .collection('Shop')
@@ -132,8 +129,9 @@ class _ShopInformationState extends State<ShopInformation> {
         children: [
           StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
-              // 선택한 리스트 ID 메인에서 넘기기 => isEqualTo 값 넣어주기
-                  .collection('Shop').where('shop_name',isEqualTo: "jackpotrounge")
+                  // 선택한 리스트 ID 메인에서 넘기기 => isEqualTo 값 넣어주기
+                  .collection('Shop')
+                  .where('shop_name', isEqualTo: "jackpotrounge")
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return Text("게임 정보가 없습니다.");
@@ -156,8 +154,10 @@ class _ShopInformationState extends State<ShopInformation> {
                         children: [
                           // Storage 이미지 저장 => FireStore 이미지 경로
                           // Image
-                          Image.network('${snapshot.data!.docs[0].get('shop_logo')}'),
-                          Text('소개글 : ${snapshot.data!.docs[0].get('shop_info')}'),
+                          Image.network(
+                              '${snapshot.data!.docs[0].get('shop_logo')}'),
+                          Text(
+                              '소개글 : ${snapshot.data!.docs[0].get('shop_info')}'),
                         ],
                       ),
                     ),
@@ -174,9 +174,62 @@ class _ShopInformationState extends State<ShopInformation> {
                         ],
                       ),
                     ),
-
                     Container(
-                      // 현재인원 / 예약자
+                      child: new ListView(
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        children: [
+                          StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('Shop')
+                                  // 가게이름
+                                  .doc('jackpotrounge')
+                                  // 게임별 인덱스 설정
+                                  .collection('Games')
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData)
+                                  return Text("게임 정보가 없습니다.");
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      width: 1,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      // 게임 리스트 출력
+                                      Text(
+                                        '게임 리스트',
+                                        style: TextStyle(fontSize: 20),
+                                      ),
+                                      Container(
+                                        height: 200,
+                                        child: new ListView.builder(
+                                            padding: EdgeInsets.all(8),
+                                            itemCount:
+                                                snapshot.data!.docs.length,
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              return new ListTile(
+                                                leading:
+                                                    Icon(Icons.games_sharp),
+                                                title: Text('${snapshot.data!.docs[index].get('게임이름')}'),
+                                                subtitle: Text('${snapshot.data!.docs[index].get('게임시작시간')}'),
+                                                // trailing: Text('예약인원 : ${snapshot.data!.docs[index]}명'),
+                                              );
+                                            }),
+                                      )
+                                    ],
+                                  ),
+                                );
+                              }),
+                        ],
+                      ),
+                    ),
+                    // 현재인원 / 예약자
+                    Container(
                       child: Column(
                         children: [
                           Row(
@@ -197,6 +250,7 @@ class _ShopInformationState extends State<ShopInformation> {
                         ],
                       ),
                     ),
+
                     // 지도 WebView
                     Container(
                       // 매장 위치
@@ -212,8 +266,12 @@ class _ShopInformationState extends State<ShopInformation> {
                               // 좌표 설정
                               // lat: ShopLocation.latitude,
                               // lng: ShopLocation.longitude,
-                              lat: snapshot.data!.docs[0].get('location').latitude,
-                              lng: snapshot.data!.docs[0].get('location').longitude,
+                              lat: snapshot.data!.docs[0]
+                                  .get('location')
+                                  .latitude,
+                              lng: snapshot.data!.docs[0]
+                                  .get('location')
+                                  .longitude,
                               showMapTypeControl: true,
                               showZoomControl: false,
                               markerImageURL:

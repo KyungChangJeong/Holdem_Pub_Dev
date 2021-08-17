@@ -139,8 +139,10 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
                       .doc('${_game_name.text}')
                       .set({
                     "게임이름": _game_name.text,
-                    "게임인원": _reserve_people.text,
+                    "게임가능인원": _reserve_people.text,
                     "게임시작시간": _selectedTime,
+                    "예약인원": 0,
+                    "게임대기인원": 0,
                   });
 
                   // 데이터 값 넘겨주기

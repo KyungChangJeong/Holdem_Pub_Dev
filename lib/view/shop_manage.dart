@@ -464,7 +464,7 @@ class _ShopManageState extends State<ShopManage> {
                                           leading: Icon(Icons.games),
                                           // DB 문서 이름
                                           title: Text(
-                                              "${snapshot.data!.docs[index].id}"),
+                                              "${snapshot.data!.docs[index].get('게임이름')}"),
                                           subtitle: Text(
                                               '${snapshot.data!.docs[index].get('게임시작시간')}'),
                                           trailing: Container(

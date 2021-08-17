@@ -17,12 +17,13 @@ class GameReserveList extends StatefulWidget {
 class _GameReserveListState extends State<GameReserveList> {
   // 직접입력 데이터
   String temp = '이름없음';
+  int reserveNum = 0;
+  int gameNum = 0;
 
   // Dialog 이름 컨트롤러
   final _dialogtextFieldController = TextEditingController();
 
   final firestoreInstance = FirebaseFirestore.instance;
-  final ScrollController _scrollController = ScrollController();
 
   // SnackBar
   void _showSnackBar(BuildContext context, String text) {
@@ -51,19 +52,78 @@ class _GameReserveListState extends State<GameReserveList> {
                   onPressed: () {
                     // ReserveUser
                     temp = _dialogtextFieldController.text;
+                    // 명단 DB List에 값 넣기
+                    /// 버그발견 문서이름.set으로하면 해당문서가 아닌 동적 문서가 생성되어 관리 어려움 발생
                     firestoreInstance
                         .collection('Shop')
                         // 가게이름
                         .doc('jackpotrounge')
                         // 게임별 인덱스 설정
                         .collection('Games')
-                        .doc('${widget.GameId}')
+                        .doc(widget.GameId)
                         .collection('ReserveList')
-                        .doc('$temp')
+                        .doc(temp)
                         .set({
                       "name": "$temp",
                     }).then((value) => print('예약자 DB 저장 성공'));
-                    
+
+                    // firestoreInstance
+                    //     .collection('Shop')
+                    // // 가게이름
+                    //     .doc('jackpotrounge')
+                    // // 게임별 인덱스 설정
+                    //     .collection('Games')
+                    //     .doc(widget.GameId)
+                    //     .get().then((value) {
+                    //   reserveNum = value.data() as int;
+                    //   print("reserveNum: $reserveNum");
+                    // });
+                    //
+                    // // 예약 + 버튼 눌렀을때 현재인원 변경
+                    // reserveNum++;
+                    // firestoreInstance
+                    //     .collection('Shop')
+                    // // 가게이름
+                    //     .doc('jackpotrounge')
+                    // // 게임별 인덱스 설정
+                    //     .collection('Games')
+                    //     .doc(widget.GameId)
+                    //     .set({
+                    //   '예약인원': reserveNum
+                    // }).then((value) {
+                    //   print("예약인원 reserveNum: $reserveNum");
+                    // });
+
+
+                    // firestoreInstance
+                    //     .collection('Shop')
+                    //     // 가게이름
+                    //     .doc('jackpotrounge')
+                    //     // 게임별 인덱스 설정
+                    //     .collection('Games')
+                    //     .add({
+                    //   "예약인원": reserveNum,
+                    // }).then((value) {
+                    //   firestoreInstance
+                    //       .collection('ReserveList')
+                    //       .doc(temp)
+                    //       .set({
+                    //     "name": "$temp",
+                    //   }).then((value) => print('예약자 DB 저장 성공'));
+                    // });
+
+                    // Collection Filed 추가 및 인원 수 데이터 추가
+                    // firestoreInstance
+                    //     .collection('Shop')
+                    // // 가게이름
+                    //     .doc('jackpotrounge')
+                    // // 게임별 인덱스 설정
+                    //     .collection('Games')
+                    //     .doc('${widget.GameId}')
+                    //     .set({
+                    //   'ReserveNum': ' ',
+                    // });
+
                     Navigator.of(context).pop();
                   },
                 )
@@ -140,7 +200,7 @@ class _GameReserveListState extends State<GameReserveList> {
                         .doc('jackpotrounge')
                         // 게임별 인덱스 설정
                         .collection('Games')
-                        .doc('${widget.GameId}')
+                        .doc(widget.GameId)
                         .collection('GameList')
                         .doc('$temp')
                         .set({
@@ -299,9 +359,10 @@ class _GameReserveListState extends State<GameReserveList> {
                                               .doc('jackpotrounge')
                                               // 게임별 인덱스 설정
                                               .collection('Games')
-                                              .doc('${widget.GameId}')
+                                              .doc(widget.GameId)
                                               .collection('ReserveList')
-                                              .doc( '${snapshot.data!.docs[index].get('name')}')
+                                              .doc(
+                                                  '${snapshot.data!.docs[index].get('name')}')
                                               .delete()
                                               .then((_) => print('대기 인원 삭제'));
                                         }),
@@ -325,7 +386,6 @@ class _GameReserveListState extends State<GameReserveList> {
                 ),
                 child: Column(
                   children: [
-
                     StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('Shop')
@@ -354,14 +414,15 @@ class _GameReserveListState extends State<GameReserveList> {
                                 child: new ListView.builder(
                                   padding: const EdgeInsets.all(8),
                                   itemCount: snapshot.data!.docs.length,
-                                  itemBuilder: (BuildContext context, int index) {
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
                                     return Slidable(
                                       actionPane: SlidableDrawerActionPane(),
                                       actionExtentRatio: 0.25,
                                       child: new ListTile(
                                         leading: Icon(Icons.person),
-                                        title: Text(
-                                            snapshot.data!.docs[index].get('name')),
+                                        title: Text(snapshot.data!.docs[index]
+                                            .get('name')),
                                       ),
 
                                       /// 오른쪽 슬라이더블
@@ -388,9 +449,11 @@ class _GameReserveListState extends State<GameReserveList> {
                                                   .collection('Games')
                                                   .doc('${widget.GameId}')
                                                   .collection('GameList')
-                                                  .doc( '${snapshot.data!.docs[index].get('name')}')
+                                                  .doc(
+                                                      '${snapshot.data!.docs[index].get('name')}')
                                                   .delete()
-                                                  .then((_) => print('게임 인원 삭제'));
+                                                  .then(
+                                                      (_) => print('게임 인원 삭제'));
                                               GameUser.removeAt(index);
                                               _shopData.game_decrement();
                                             }),
@@ -401,15 +464,17 @@ class _GameReserveListState extends State<GameReserveList> {
                               ),
 
                               // 게임 시작 버튼
-                              TextButton(onPressed: (){
-                                // 1. 상태 플래그 변화(DB -> {Games => 해당 게임 Flag변화})
-                                // 2. 예약 신청 못하게 표시
-                                // 3. 사용자 화면에서 변하게 변경
-                                
-                              }, child: Text('게임 시작',style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 20
-                              ),))
+                              TextButton(
+                                  onPressed: () {
+                                    // 1. 상태 플래그 변화(DB -> {Games => 해당 게임 Flag변화})
+                                    // 2. 예약 신청 못하게 표시
+                                    // 3. 사용자 화면에서 변하게 변경
+                                  },
+                                  child: Text(
+                                    '게임 시작',
+                                    style: TextStyle(
+                                        color: Colors.red, fontSize: 20),
+                                  ))
                             ],
                           );
                         }),
