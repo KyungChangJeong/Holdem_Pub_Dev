@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:holdem_pub/view/shop_manage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:holdem_pub/model//shop_manage.dart';
 
 class ShopManageSetting extends StatefulWidget {
   const ShopManageSetting({Key? key}) : super(key: key);
@@ -11,7 +12,7 @@ class ShopManageSetting extends StatefulWidget {
 }
 
 class _ShopManageSettingState extends State<ShopManageSetting> {
-  final firestoreInstance = FirebaseFirestore.instance;
+  FirebaseFirestore firestoreInstance = FirebaseFirestore.instance;
   final _game_name = TextEditingController();
   final _reserve_people = TextEditingController();
   String _selectedTime = '';
@@ -117,32 +118,37 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
                       .get()
                       .then(
                     (value) {
-                      gameIndex = (value.data())!['gameSetting'];
-                      print('gameIndex : $gameIndex');
+                      // gameIndex = (value.data())!['gameSetting'];
+                      // print('gameIndex : $gameIndex');
                     },
                   );
-                  gameIndex++;
+                  // gameIndex++;
 
                   // 설정된 게임 수 DB 저장
-                  firestoreInstance
-                      .collection('Shop')
-                      .doc('jackpotrounge')
-                      .update({
-                    "gameSetting": gameIndex,
-                  });
+                  // firestoreInstance
+                  //     .collection('Shop')
+                  //     .doc('jackpotrounge')
+                  //     .update({
+                  //   "gameSetting": gameIndex,
+                  // });
 
                   // 게임 추가 설정
                   firestoreInstance
                       .collection('Shop')
                       .doc('jackpotrounge')
                       .collection('Games')
-                      .doc(_game_name.text)
+                      // .doc('가자')
+                      .doc('${_game_name.text}')
                       .set({
                     "게임이름": _game_name.text,
                     "게임가능인원": _reserve_people.text,
                     "게임시작시간": _selectedTime,
                     "예약인원": 0,
                     "게임대기인원": 0,
+                  }).then((_) {
+                    print('_game_name: ${_game_name} ');
+                    print('_game_name.text: ${_game_name.text} ');
+                    print('_game_name.text.runtimeType: ${_game_name.text.runtimeType} ');
                   });
 
                   // 데이터 값 넘겨주기
@@ -157,3 +163,4 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
     );
   }
 }
+

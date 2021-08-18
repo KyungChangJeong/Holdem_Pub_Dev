@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 class GameReserveList extends StatefulWidget {
   final String GameId;
 
-  GameReserveList({Key? key, required this.GameId});
+  GameReserveList({Key? key, required this.GameId}): super(key: key);
 
   @override
   _GameReserveListState createState() => _GameReserveListState();
@@ -23,9 +23,12 @@ class _GameReserveListState extends State<GameReserveList> {
   // Dialog 이름 컨트롤러
   final _dialogtextFieldController = TextEditingController();
 
-  final firestoreInstance = FirebaseFirestore.instance;
+  FirebaseFirestore firestoreInstance = FirebaseFirestore.instance;
 
-  CollectionReference users = FirebaseFirestore.instance.collection('Shop').doc('jackpotrounge').collection('Games');
+  CollectionReference users = FirebaseFirestore.instance
+      .collection('Shop')
+      .doc('jackpotrounge')
+      .collection('Games');
 
   // SnackBar
   void _showSnackBar(BuildContext context, String text) {
@@ -56,25 +59,17 @@ class _GameReserveListState extends State<GameReserveList> {
                     temp = _dialogtextFieldController.text;
                     // 명단 DB List에 값 넣기
                     /// 버그발견 문서이름.set으로하면 해당문서가 아닌 동적 문서가 생성되어 관리 어려움 발생
-                    ///
-                    users.doc(widget.GameId).collection('ReserveList').doc(temp).set(
-                        {
-                          "name": "$temp",
-                        });
 
-                    // firestoreInstance
-                    //     .collection('Shop')
-                    //     // 가게이름
-                    //     .doc('jackpotrounge')
-                    //     // 게임별 인덱스 설정
-                    //     .collection('Games')
-                    //     .doc(widget.GameId)
-                    //     .collection('ReserveList')
-                    //     .doc(temp)
-                    //     .set({
-                    //   "name": "$temp",
-                    //
-                    // }).then((value) => print('예약자 DB 저장 성공'));
+                      firestoreInstance
+                          .collection('Shop')
+                          .doc('jackpotrounge')
+                          .collection('Games')
+                          .doc('${widget.GameId.trim()}')
+                          // .doc('')
+                          .collection('ReserveList').doc(temp).set({
+                        "name": "$temp",
+                      });
+
 
                     /// 버그 해결 후 현재인원 입력
                     // firestoreInstance
@@ -82,11 +77,14 @@ class _GameReserveListState extends State<GameReserveList> {
                     //     // 가게이름
                     //     .doc('jackpotrounge')
                     //     // 게임별 인덱스 설정
-                    //     .collection('Games')
-                    //     .doc(widget.GameId)
-                    //     .set({
-                    //   '예약인원': nowNum+1,
+                    //     .collection('Games').where('name',isEqualTo:widget.GameId).get().then((value){
+                    //       print('value:$value');
+                    //      print("value0 : ${value.docs}");
+                    //
+                    //   // '예약인원': nowNum+1,
                     // });
+
+                    // print("widget.GameId: ${widget.GameId}");
 
                     // // 예약 + 버튼 눌렀을때 현재인원 변경
                     // reserveNum++;
@@ -103,22 +101,6 @@ class _GameReserveListState extends State<GameReserveList> {
                     //   print("예약인원 reserveNum: $reserveNum");
                     // });
 
-                    // firestoreInstance
-                    //     .collection('Shop')
-                    //     // 가게이름
-                    //     .doc('jackpotrounge')
-                    //     // 게임별 인덱스 설정
-                    //     .collection('Games')
-                    //     .add({
-                    //   "예약인원": reserveNum,
-                    // }).then((value) {
-                    //   firestoreInstance
-                    //       .collection('ReserveList')
-                    //       .doc(temp)
-                    //       .set({
-                    //     "name": "$temp",
-                    //   }).then((value) => print('예약자 DB 저장 성공'));
-                    // });
 
                     Navigator.of(context).pop();
                   },
@@ -196,7 +178,7 @@ class _GameReserveListState extends State<GameReserveList> {
                         .doc('jackpotrounge')
                         // 게임별 인덱스 설정
                         .collection('Games')
-                        .doc(widget.GameId)
+                        .doc(widget.GameId.trim())
                         .collection('GameList')
                         .doc('$temp')
                         .set({
@@ -261,7 +243,7 @@ class _GameReserveListState extends State<GameReserveList> {
                         .collection('Shop')
                         .doc('jackpotrounge')
                         .collection('Games')
-                        .doc('${widget.GameId}')
+                        .doc('${widget.GameId.trim()}')
                         .collection('ReserveList')
                         .snapshots(),
                     builder: (context, snapshot) {
@@ -272,7 +254,10 @@ class _GameReserveListState extends State<GameReserveList> {
                             '대기 인원 (${snapshot.data!.size})',
                             style: TextStyle(fontSize: 18),
                           ),
-
+                          Text(
+                            '(${users.doc(widget.GameId.trim()).collection('ReserveList').path})',
+                            style: TextStyle(fontSize: 18),
+                          ),
                           /// 관리자 직접 예약자 추가
                           IconButton(
                               onPressed: () {
@@ -312,7 +297,7 @@ class _GameReserveListState extends State<GameReserveList> {
                                               .doc('jackpotrounge')
                                               // 게임별 인덱스 설정
                                               .collection('Games')
-                                              .doc('${widget.GameId}')
+                                              .doc('${widget.GameId.trim()}')
                                               .collection('GameList')
                                               .doc(
                                                   '${snapshot.data!.docs[index].get('name')}')
@@ -328,7 +313,7 @@ class _GameReserveListState extends State<GameReserveList> {
                                               .doc('jackpotrounge')
                                               // 게임별 인덱스 설정
                                               .collection('Games')
-                                              .doc('${widget.GameId}')
+                                              .doc('${widget.GameId.trim()}')
                                               .collection('ReserveList')
                                               .doc(
                                                   '${snapshot.data!.docs[index].get('name')}')
@@ -355,7 +340,7 @@ class _GameReserveListState extends State<GameReserveList> {
                                               .doc('jackpotrounge')
                                               // 게임별 인덱스 설정
                                               .collection('Games')
-                                              .doc(widget.GameId)
+                                              .doc(widget.GameId.trim())
                                               .collection('ReserveList')
                                               .doc(
                                                   '${snapshot.data!.docs[index].get('name')}')
@@ -387,7 +372,7 @@ class _GameReserveListState extends State<GameReserveList> {
                             .collection('Shop')
                             .doc('jackpotrounge')
                             .collection('Games')
-                            .doc('${widget.GameId}')
+                            .doc('${widget.GameId.trim()}')
                             .collection('GameList')
                             .snapshots(),
                         builder: (context, snapshot) {
@@ -443,7 +428,7 @@ class _GameReserveListState extends State<GameReserveList> {
                                                   .doc('jackpotrounge')
                                                   // 게임별 인덱스 설정
                                                   .collection('Games')
-                                                  .doc('${widget.GameId}')
+                                                  .doc('${widget.GameId.trim()}')
                                                   .collection('GameList')
                                                   .doc(
                                                       '${snapshot.data!.docs[index].get('name')}')
