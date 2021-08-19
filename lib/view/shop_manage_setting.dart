@@ -138,17 +138,13 @@ class _ShopManageSettingState extends State<ShopManageSetting> {
                       .doc('jackpotrounge')
                       .collection('Games')
                       // .doc('가자')
-                      .doc('${_game_name.text}')
+                      .doc('${_game_name.text.trim()}')
                       .set({
-                    "게임이름": _game_name.text,
+                    "게임이름": _game_name.text.trim(),
                     "게임가능인원": _reserve_people.text,
                     "게임시작시간": _selectedTime,
                     "예약인원": 0,
                     "게임대기인원": 0,
-                  }).then((_) {
-                    print('_game_name: ${_game_name} ');
-                    print('_game_name.text: ${_game_name.text} ');
-                    print('_game_name.text.runtimeType: ${_game_name.text.runtimeType} ');
                   });
 
                   // 데이터 값 넘겨주기

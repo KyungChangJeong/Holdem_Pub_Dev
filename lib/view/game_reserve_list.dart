@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 class GameReserveList extends StatefulWidget {
   final String GameId;
 
-  GameReserveList({Key? key, required this.GameId}): super(key: key);
+  GameReserveList({Key? key, required this.GameId}) : super(key: key);
 
   @override
   _GameReserveListState createState() => _GameReserveListState();
@@ -40,6 +40,7 @@ class _GameReserveListState extends State<GameReserveList> {
   @override
   Widget build(BuildContext context) {
     ShopData _shopData = Provider.of<ShopData>(context);
+
     void _reserveAddUserDialog(int nowNum) async {
       return showDialog(
           context: context,
@@ -57,51 +58,40 @@ class _GameReserveListState extends State<GameReserveList> {
                   onPressed: () {
                     // ReserveUser
                     temp = _dialogtextFieldController.text;
-                    // 명단 DB List에 값 넣기
-                    /// 버그발견 문서이름.set으로하면 해당문서가 아닌 동적 문서가 생성되어 관리 어려움 발생
-
+                    // 명단 DB ReserveList에 값 넣기
+                    firestoreInstance
+                        .collection('Shop')
+                        .doc('jackpotrounge')
+                        .collection('Games')
+                        .doc('${widget.GameId.trim()}')
+                        .collection('ReserveList')
+                        .doc(temp)
+                        .set({
+                      "name": "$temp",
+                    }).then((_) {
+                      /// 예약인원수 변경(추가)
                       firestoreInstance
                           .collection('Shop')
+                          // 가게이름
                           .doc('jackpotrounge')
+                          // 게임별 인덱스 설정
                           .collection('Games')
-                          .doc('${widget.GameId.trim()}')
-                          // .doc('')
-                          .collection('ReserveList').doc(temp).set({
-                        "name": "$temp",
+                          .doc(widget.GameId.trim())
+                          .collection('ReserveList')
+                          .get()
+                          .then((value) {
+                        firestoreInstance
+                            .collection('Shop')
+                            // 가게이름
+                            .doc('jackpotrounge')
+                            // 게임별 인덱스 설정
+                            .collection('Games')
+                            .doc(widget.GameId.trim())
+                            .update({
+                          "예약인원": value.docs.length,
+                        });
                       });
-
-
-                    /// 버그 해결 후 현재인원 입력
-                    // firestoreInstance
-                    //     .collection('Shop')
-                    //     // 가게이름
-                    //     .doc('jackpotrounge')
-                    //     // 게임별 인덱스 설정
-                    //     .collection('Games').where('name',isEqualTo:widget.GameId).get().then((value){
-                    //       print('value:$value');
-                    //      print("value0 : ${value.docs}");
-                    //
-                    //   // '예약인원': nowNum+1,
-                    // });
-
-                    // print("widget.GameId: ${widget.GameId}");
-
-                    // // 예약 + 버튼 눌렀을때 현재인원 변경
-                    // reserveNum++;
-                    // firestoreInstance
-                    //     .collection('Shop')
-                    // // 가게이름
-                    //     .doc('jackpotrounge')
-                    // // 게임별 인덱스 설정
-                    //     .collection('Games')
-                    //     .doc(widget.GameId)
-                    //     .set({
-                    //   '예약인원': reserveNum
-                    // }).then((value) {
-                    //   print("예약인원 reserveNum: $reserveNum");
-                    // });
-
-
+                    });
                     Navigator.of(context).pop();
                   },
                 )
@@ -110,7 +100,7 @@ class _GameReserveListState extends State<GameReserveList> {
           });
     }
 
-    void _reserveUpdateUserDialog(int index) async {
+    void _reserveUpdateUserDialog(String beforeName) async {
       return showDialog(
           context: context,
           builder: (context) {
@@ -128,22 +118,31 @@ class _GameReserveListState extends State<GameReserveList> {
                     // ReserveUser
                     temp = _dialogtextFieldController.text;
 
-                    /// 수정 에러 발생
-                    /// doc에서 이름을 한번 변경시 추적이 안되는 문제 발생
-                    // firestoreInstance
-                    //     .collection('Shop')
-                    //     // 가게이름
-                    //     .doc('jackpotrounge')
-                    //     // 게임별 인덱스 설정
-                    //     .collection('Games')
-                    //     .doc('Game1')
-                    //     .collection('ReserveList')
-                    //     .doc('${ReserveUser[index]}')
-                    //     .update({
-                    //   "name": "$temp",
-                    // }).then((value) => print('예약자 DB 저장 성공'));
-                    setState(() {
-                      ReserveUser[index] = temp;
+                    /// 여러번 수정 변경 가능
+                    firestoreInstance
+                        .collection('Shop')
+                        // 가게이름
+                        .doc('jackpotrounge')
+                        // 게임별 인덱스 설정
+                        .collection('Games')
+                        .doc('${widget.GameId.trim()}')
+                        // 변경 전 이름을 찾아서 정보 수정
+                        .collection('ReserveList')
+                        .where('name', isEqualTo: "$beforeName")
+                        .get()
+                        .then((value) {
+                      firestoreInstance
+                          .collection('Shop')
+                          // 가게이름
+                          .doc('jackpotrounge')
+                          // 게임별 인덱스 설정
+                          .collection('Games')
+                          .doc('${widget.GameId.trim()}')
+                          .collection('ReserveList')
+                          .doc('${value.docs[0].id}')
+                          .update({
+                        "name": "$temp",
+                      });
                     });
                     Navigator.of(context).pop();
                   },
@@ -168,10 +167,10 @@ class _GameReserveListState extends State<GameReserveList> {
                 TextButton(
                   child: Text('추가'),
                   onPressed: () {
-                    // GameUser
-                    temp = _dialogtextFieldController.text;
+                    // GameList
+                    temp = _dialogtextFieldController.text.trim();
 
-                    /// DB 저장
+                    /// GameList DB 저장
                     firestoreInstance
                         .collection('Shop')
                         // 가게이름
@@ -180,14 +179,34 @@ class _GameReserveListState extends State<GameReserveList> {
                         .collection('Games')
                         .doc(widget.GameId.trim())
                         .collection('GameList')
-                        .doc('$temp')
+                        .doc(temp.trim())
                         .set({
-                      "name": "$temp",
-                    }).then((value) => print('게임 인원 저장'));
-                    setState(() {
-                      _shopData.game_increment();
-                      GameUser.add(temp);
+                      "name": "${temp.trim()}",
+                    }).then((_) {
+                      /// 게임대기인원수 변경(추가)
+                      firestoreInstance
+                          .collection('Shop')
+                          // 가게이름
+                          .doc('jackpotrounge')
+                          // 게임별 인덱스 설정
+                          .collection('Games')
+                          .doc(widget.GameId.trim())
+                          .collection('GameList')
+                          .get()
+                          .then((value) {
+                        firestoreInstance
+                            .collection('Shop')
+                            // 가게이름
+                            .doc('jackpotrounge')
+                            // 게임별 인덱스 설정
+                            .collection('Games')
+                            .doc(widget.GameId.trim())
+                            .update({
+                          "게임대기인원": value.docs.length,
+                        });
+                      });
                     });
+
                     Navigator.of(context).pop();
                   },
                 )
@@ -196,7 +215,7 @@ class _GameReserveListState extends State<GameReserveList> {
           });
     }
 
-    void _nowUserUpdateUserDialog(int index) async {
+    void _nowUserUpdateUserDialog(String beforeName) async {
       return showDialog(
           context: context,
           builder: (context) {
@@ -211,8 +230,34 @@ class _GameReserveListState extends State<GameReserveList> {
                 TextButton(
                   child: Text('수정'),
                   onPressed: () {
-                    // ReserveUser
-                    temp = _dialogtextFieldController.text;
+                    // GameList
+                    temp = _dialogtextFieldController.text.trim();
+
+                    firestoreInstance
+                        .collection('Shop')
+                        // 가게이름
+                        .doc('jackpotrounge')
+                        // 게임별 인덱스 설정
+                        .collection('Games')
+                        .doc('${widget.GameId.trim()}')
+                        // 변경 전 이름을 찾아서 정보 수정
+                        .collection('GameList')
+                        .where('name', isEqualTo: "$beforeName")
+                        .get()
+                        .then((value) {
+                      firestoreInstance
+                          .collection('Shop')
+                          // 가게이름
+                          .doc('jackpotrounge')
+                          // 게임별 인덱스 설정
+                          .collection('Games')
+                          .doc('${widget.GameId.trim()}')
+                          .collection('GameList')
+                          .doc('${value.docs[0].id}')
+                          .update({
+                        "name": "$temp",
+                      });
+                    });
 
                     Navigator.of(context).pop();
                   },
@@ -254,10 +299,7 @@ class _GameReserveListState extends State<GameReserveList> {
                             '대기 인원 (${snapshot.data!.size})',
                             style: TextStyle(fontSize: 18),
                           ),
-                          Text(
-                            '(${users.doc(widget.GameId.trim()).collection('ReserveList').path})',
-                            style: TextStyle(fontSize: 18),
-                          ),
+
                           /// 관리자 직접 예약자 추가
                           IconButton(
                               onPressed: () {
@@ -290,7 +332,7 @@ class _GameReserveListState extends State<GameReserveList> {
                                         onTap: () {
                                           _showSnackBar(context, '현재 인원으로');
 
-                                          // GameUser에 status 추가
+                                          /// GameList에 사용자 추가
                                           firestoreInstance
                                               .collection('Shop')
                                               // 가게이름
@@ -304,9 +346,32 @@ class _GameReserveListState extends State<GameReserveList> {
                                               .set({
                                             "name":
                                                 "${snapshot.data!.docs[index].get('name')}"
-                                          }).then((_) => print('대기 인원 삭제'));
+                                          }).then((_) {
+                                            // 게임예약인원 수 변경
+                                            firestoreInstance
+                                                .collection('Shop')
+                                                // 가게이름
+                                                .doc('jackpotrounge')
+                                                // 게임별 인덱스 설정
+                                                .collection('Games')
+                                                .doc(widget.GameId.trim())
+                                                .collection('GameList')
+                                                .get()
+                                                .then((value) {
+                                              firestoreInstance
+                                                  .collection('Shop')
+                                                  // 가게이름
+                                                  .doc('jackpotrounge')
+                                                  // 게임별 인덱스 설정
+                                                  .collection('Games')
+                                                  .doc(widget.GameId.trim())
+                                                  .update({
+                                                "게임대기인원": value.docs.length,
+                                              });
+                                            });
+                                          });
 
-                                          // ReserveUser에서 삭제
+                                          /// ReserveList에 사용자 삭제
                                           firestoreInstance
                                               .collection('Shop')
                                               // 가게이름
@@ -318,7 +383,30 @@ class _GameReserveListState extends State<GameReserveList> {
                                               .doc(
                                                   '${snapshot.data!.docs[index].get('name')}')
                                               .delete()
-                                              .then((_) => print('대기 인원 삭제'));
+                                              .then((_) {
+                                            // 예약인원 수 변경(삭제)
+                                            firestoreInstance
+                                                .collection('Shop')
+                                                // 가게이름
+                                                .doc('jackpotrounge')
+                                                // 게임별 인덱스 설정
+                                                .collection('Games')
+                                                .doc(widget.GameId.trim())
+                                                .collection('ReserveList')
+                                                .get()
+                                                .then((value) {
+                                              firestoreInstance
+                                                  .collection('Shop')
+                                                  // 가게이름
+                                                  .doc('jackpotrounge')
+                                                  // 게임별 인덱스 설정
+                                                  .collection('Games')
+                                                  .doc(widget.GameId.trim())
+                                                  .update({
+                                                "예약인원": value.docs.length,
+                                              });
+                                            });
+                                          });
                                         }),
                                     IconSlideAction(
                                         caption: '정보수정',
@@ -326,7 +414,8 @@ class _GameReserveListState extends State<GameReserveList> {
                                         icon: Icons.update,
                                         onTap: () {
                                           _showSnackBar(context, '정보 수정');
-                                          _reserveUpdateUserDialog(index);
+                                          _reserveUpdateUserDialog(
+                                              '${snapshot.data!.docs[index].get('name')}');
                                         }),
                                     IconSlideAction(
                                         caption: '삭제',
@@ -342,10 +431,45 @@ class _GameReserveListState extends State<GameReserveList> {
                                               .collection('Games')
                                               .doc(widget.GameId.trim())
                                               .collection('ReserveList')
-                                              .doc(
-                                                  '${snapshot.data!.docs[index].get('name')}')
-                                              .delete()
-                                              .then((_) => print('대기 인원 삭제'));
+                                              .where('name',
+                                                  isEqualTo:
+                                                      '${snapshot.data!.docs[index].get('name')}')
+                                              .get()
+                                              .then((value) {
+                                            firestoreInstance
+                                                .collection('Shop')
+                                                // 가게이름
+                                                .doc('jackpotrounge')
+                                                // 게임별 인덱스 설정
+                                                .collection('Games')
+                                                .doc(widget.GameId.trim())
+                                                .collection('ReserveList')
+                                                .doc('${value.docs[0].id}')
+                                                .delete();
+                                          }).then((_) {
+                                            /// 예약인원 수 변경(삭제)
+                                            firestoreInstance
+                                                .collection('Shop')
+                                                // 가게이름
+                                                .doc('jackpotrounge')
+                                                // 게임별 인덱스 설정
+                                                .collection('Games')
+                                                .doc(widget.GameId.trim())
+                                                .collection('ReserveList')
+                                                .get()
+                                                .then((value) {
+                                              firestoreInstance
+                                                  .collection('Shop')
+                                                  // 가게이름
+                                                  .doc('jackpotrounge')
+                                                  // 게임별 인덱스 설정
+                                                  .collection('Games')
+                                                  .doc(widget.GameId.trim())
+                                                  .update({
+                                                "예약인원": value.docs.length,
+                                              });
+                                            });
+                                          });
                                         }),
                                   ],
                                 );
@@ -414,7 +538,8 @@ class _GameReserveListState extends State<GameReserveList> {
                                             icon: Icons.update,
                                             onTap: () {
                                               _showSnackBar(context, '정보 수정');
-                                              _nowUserUpdateUserDialog(index);
+                                              _nowUserUpdateUserDialog(
+                                                  '${snapshot.data!.docs[index].get('name')}');
                                             }),
                                         IconSlideAction(
                                             caption: '삭제',
@@ -428,15 +553,51 @@ class _GameReserveListState extends State<GameReserveList> {
                                                   .doc('jackpotrounge')
                                                   // 게임별 인덱스 설정
                                                   .collection('Games')
-                                                  .doc('${widget.GameId.trim()}')
-                                                  .collection('GameList')
                                                   .doc(
-                                                      '${snapshot.data!.docs[index].get('name')}')
-                                                  .delete()
-                                                  .then(
-                                                      (_) => print('게임 인원 삭제'));
-                                              GameUser.removeAt(index);
-                                              _shopData.game_decrement();
+                                                      '${widget.GameId.trim()}')
+                                                  .collection('GameList')
+                                                  .where('name',
+                                                      isEqualTo:
+                                                          "${snapshot.data!.docs[index].get('name')}")
+                                                  .get()
+                                                  .then((value) {
+                                                print(
+                                                    '게임삭제 : ${value.docs[0].id}');
+                                                firestoreInstance
+                                                    .collection('Shop')
+                                                    // 가게이름
+                                                    .doc('jackpotrounge')
+                                                    // 게임별 인덱스 설정
+                                                    .collection('Games')
+                                                    .doc(
+                                                        '${widget.GameId.trim()}')
+                                                    .collection('GameList')
+                                                    .doc('${value.docs[0].id}')
+                                                    .delete();
+                                              }).then((_) {
+                                                /// 게임예약인원 수 변경(삭제)
+                                                firestoreInstance
+                                                    .collection('Shop')
+                                                    // 가게이름
+                                                    .doc('jackpotrounge')
+                                                    // 게임별 인덱스 설정
+                                                    .collection('Games')
+                                                    .doc(widget.GameId.trim())
+                                                    .collection('GameList')
+                                                    .get()
+                                                    .then((value) {
+                                                  firestoreInstance
+                                                      .collection('Shop')
+                                                      // 가게이름
+                                                      .doc('jackpotrounge')
+                                                      // 게임별 인덱스 설정
+                                                      .collection('Games')
+                                                      .doc(widget.GameId.trim())
+                                                      .update({
+                                                    "게임대기인원": value.docs.length,
+                                                  });
+                                                });
+                                              });
                                             }),
                                       ],
                                     );
