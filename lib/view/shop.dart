@@ -53,8 +53,8 @@ class _ShopInformationState extends State<ShopInformation> {
   Widget build(BuildContext context) {
     ShopData _shopData = Provider.of<ShopData>(context);
 
-    /// 이거 일단 사용 안함
-    void showAlertDialog(BuildContext context) async {
+    /// 예약 확인차
+    void showAlertDialog(String gameName) async {
       String result = await showDialog(
         context: context,
         barrierDismissible: false, // user must tap button!
@@ -72,35 +72,78 @@ class _ShopInformationState extends State<ShopInformation> {
                   setState(() {
                     // 예약 취소 상태
                     if (game_reserve_flag) {
-                      _shopData.reserve_decrement();
-
                       /// DB 사용자 예약 정보 삭제
                       firestoreInstance
                           .collection('Shop')
                           .doc('jackpotrounge')
                           .collection('Games')
-                          .doc('Game1')
+                          .doc('$gameName')
                           .collection('ReserveList')
-                          // 사용자 예약 개인정보 삭제
-                          .doc('Test2')
-                          .delete()
-                          .then((_) => print('삭제 성공'));
+                        // 사용자 이름 넣기
+                          .doc('사용자예약')
+                          .delete().then((_) {
+                        /// 예약인원수 변경(삭제)
+                        firestoreInstance
+                            .collection('Shop')
+                        // 가게이름
+                            .doc('jackpotrounge')
+                        // 게임별 인덱스 설정
+                            .collection('Games')
+                            .doc('$gameName')
+                            .collection('ReserveList')
+                            .get()
+                            .then((value) {
+                          firestoreInstance
+                              .collection('Shop')
+                          // 가게이름
+                              .doc('jackpotrounge')
+                          // 게임별 인덱스 설정
+                              .collection('Games')
+                              .doc('$gameName')
+                              .update({
+                            "예약인원": value.docs.length,
+                          });
+                        });
+                      });
                     }
+
                     // 예약 하기 상태
                     else {
-                      _shopData.reserve_increment();
-
                       /// DB 사용자의 예약 정보 등록하기
+                      // 사용자 예약
                       firestoreInstance
                           .collection('Shop')
                           .doc('jackpotrounge')
                           .collection('Games')
-                          .doc('Game1')
+                          .doc('$gameName')
                           .collection('ReserveList')
-                          // 사용자 개인정보 예약자 현황에 넣기
-                          .doc('Test2')
+                       // 사용자 이름 넣기
+                          .doc('사용자예약')
                           .set({
-                        "name": "Test1",
+                        "name": '사용자예약',
+                      }).then((_) {
+                        /// 예약인원수 변경(추가)
+                        firestoreInstance
+                            .collection('Shop')
+                        // 가게이름
+                            .doc('jackpotrounge')
+                        // 게임별 인덱스 설정
+                            .collection('Games')
+                            .doc('$gameName')
+                            .collection('ReserveList')
+                            .get()
+                            .then((value) {
+                          firestoreInstance
+                              .collection('Shop')
+                          // 가게이름
+                              .doc('jackpotrounge')
+                          // 게임별 인덱스 설정
+                              .collection('Games')
+                              .doc('$gameName')
+                              .update({
+                            "예약인원": value.docs.length,
+                          });
+                        });
                       });
                     }
                     game_reserve_flag = !game_reserve_flag;
@@ -217,7 +260,25 @@ class _ShopInformationState extends State<ShopInformation> {
                                                     Icon(Icons.games_sharp),
                                                 title: Text('${snapshot.data!.docs[index].get('게임이름')}'),
                                                 subtitle: Text('${snapshot.data!.docs[index].get('게임시작시간')}'),
-                                                // trailing: Text('예약인원 : ${firestoreInstance.collection('Shop').doc('jackpotrounge').collection('Games').doc('${snapshot.data!.docs[index].get('게임이름')}').collection('ReserveList')}명'),
+                                                trailing:game_reserve_flag
+                                                    ?
+                                                // 예약 취소
+                                                TextButton(
+                                                    onPressed: () {
+                                                      // 예약 취소 창
+                                                      showAlertDialog(snapshot.data!.docs[index].get('게임이름'));
+                                                    },
+                                                    child: Text('취소하기'))
+                                                    :
+                                                // 예약 하기
+                                                TextButton(
+                                                    onPressed: () {
+                                                      // 예약 확인 창
+                                                      showAlertDialog(snapshot.data!.docs[index].get('게임이름'));
+                                                    },
+                                                    child: Text('예약하기')),
+
+
                                               );
                                             }),
                                       )
@@ -228,30 +289,32 @@ class _ShopInformationState extends State<ShopInformation> {
                         ],
                       ),
                     ),
+
                     // 현재인원 / 예약자
-                    Container(
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('예약인원 : ${_shopData.getReserveNum()}명'),
-                              game_reserve_flag
-                                  ? Text(
-                                      '  예약됨',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                      ),
-                                    )
-                                  : Text(''),
-                            ],
-                          ),
-                          Text('현재인원 : ${_shopData.getGameNum()}명'),
-                        ],
-                      ),
-                    ),
+                    // Container(
+                    //   child: Column(
+                    //     children: [
+                    //       Row(
+                    //         mainAxisAlignment: MainAxisAlignment.center,
+                    //         children: [
+                    //           Text('예약인원 : ${_shopData.getReserveNum()}명'),
+                    //           game_reserve_flag
+                    //               ? Text(
+                    //                   '  예약됨',
+                    //                   style: TextStyle(
+                    //                     color: Colors.red,
+                    //                   ),
+                    //                 )
+                    //               : Text(''),
+                    //         ],
+                    //       ),
+                    //       Text('현재인원 : ${_shopData.getGameNum()}명'),
+                    //     ],
+                    //   ),
+                    // ),
 
                     // 지도 WebView
+
                     Container(
                       // 매장 위치
                       child: Column(
@@ -280,33 +343,33 @@ class _ShopInformationState extends State<ShopInformation> {
                         ],
                       ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        game_reserve_flag
-                            ?
-                            // 예약 취소
-                            TextButton(
-                                onPressed: () {
-                                  // 예약 취소 창
-                                  showAlertDialog(context);
-                                },
-                                child: Text('취소하기'))
-                            :
-                            // 예약 하기
-                            TextButton(
-                                onPressed: () {
-                                  // 예약 확인 창
-                                  showAlertDialog(context);
-                                },
-                                child: Text('예약하기')),
-                        TextButton(
-                            onPressed: () {
-                              // 채팅 페이지로
-                            },
-                            child: Text('채팅'))
-                      ],
-                    ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     game_reserve_flag
+                    //         ?
+                    //         // 예약 취소
+                    //         TextButton(
+                    //             onPressed: () {
+                    //               // 예약 취소 창
+                    //               showAlertDialog(context);
+                    //             },
+                    //             child: Text('취소하기'))
+                    //         :
+                    //         // 예약 하기
+                    //         TextButton(
+                    //             onPressed: () {
+                    //               // 예약 확인 창
+                    //               showAlertDialog(context);
+                    //             },
+                    //             child: Text('예약하기')),
+                    //     TextButton(
+                    //         onPressed: () {
+                    //           // 채팅 페이지로
+                    //         },
+                    //         child: Text('채팅'))
+                    //   ],
+                    // ),
                   ],
                 );
               }),
