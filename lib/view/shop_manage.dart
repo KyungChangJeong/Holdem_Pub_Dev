@@ -4,31 +4,23 @@ import 'package:holdem_pub/view/shop_manage_setting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-
 import 'game_reserve_list.dart';
 
 class ShopManage extends StatefulWidget {
-  const ShopManage({Key? key}) : super(key: key);
+
+  String introText;
+  ShopManage({Key? key,required this.introText }) : super(key: key);
 
   @override
   _ShopManageState createState() => _ShopManageState();
-}
-
-var ReserveUser = [];
-var GameUser = [];
-var GameList = [];
-
-class GameListData {
-  late String reserveNum;
-  late String time;
-
-  GameListData(this.reserveNum, this.time);
 }
 
 class _ShopManageState extends State<ShopManage> {
   // Radio ListTile구현
   String _gameTableFlag = 'Waiting';
   String _shopFlag = 'Closed';
+
+  late String introText;
 
   // 직접입력 데이터
   String temp = '이름없음';
@@ -103,7 +95,7 @@ class _ShopManageState extends State<ShopManage> {
                             Container(
                               width: 300,
                               child: TextFormField(
-                                initialValue: _shopData.getInfo(),
+                                initialValue: widget.introText,
                                 // controller: _InformationTextEdit,
                                 decoration: InputDecoration(
                                   // icon: Icon(Icons.shop),
@@ -117,9 +109,7 @@ class _ShopManageState extends State<ShopManage> {
                             ),
                             TextButton(
                                 onPressed: () {
-                                  CollectionReference users = FirebaseFirestore
-                                      .instance
-                                      .collection('users');
+
                                 },
                                 child: Text('저장'))
                           ],

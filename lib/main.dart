@@ -4,6 +4,7 @@ import 'package:holdem_pub/view/shop_manage.dart';
 import 'package:provider/provider.dart';
 import 'model/ShopData.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,9 +17,7 @@ void main() async {
     Provider(
       create: (context) => ShopList(),
     ),
-    Provider(
-      create: (context) => ShopManage(),
-    ),
+
     Provider(
       create: (context) => ShopInformation(),
     ),
@@ -63,11 +62,19 @@ class ShopList extends StatelessWidget {
               ],
             ),
             onTap: () {
-              // 매장 상세 정보 페이지 (Navigator)
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ShopManage()),
-              );
+              FirebaseFirestore firestoreInstance = FirebaseFirestore.instance;
+              String temp;
+              firestoreInstance
+                  .collection('Shop').doc('jackpotrounge').get().then((value) {
+                print('value: ${value.data()!['shop_info']}');
+                temp = value.data()!['shop_info'];
+
+                // 매장 상세 정보 페이지 (Navigator)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ShopManage(introText: temp)),
+                );
+              });
             },
           ),
           ListTile(

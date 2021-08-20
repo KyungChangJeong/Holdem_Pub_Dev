@@ -4,6 +4,7 @@ import 'package:holdem_pub/model/ShopData.dart';
 import 'package:kakaomap_webview/kakaomap_webview.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class ShopInformation extends StatefulWidget {
   @override
@@ -24,29 +25,11 @@ class _ShopInformationState extends State<ShopInformation> {
 
   final firestoreInstance = FirebaseFirestore.instance;
 
-  // FB Shop DB
-  late String ShopName = "";
-  late String ShopInfo = "";
-  late String ShopLogo = "";
-  late var ShopLocation;
-
-  @override
-  void initState() {
-    // 로직상 문제 발견 => 이전 페이지에서 해당 데이터 넘겨줘서 읽어들여야 됨
-    firestoreInstance
-        .collection('Shop')
-        .where('shop_name', isEqualTo: 'jackpotrounge')
-        .get()
-        .then((value) {
-      value.docs.forEach((result) {
-        ShopName = result.data()['shop_name'];
-        ShopLogo = result.data()['shop_logo'];
-        ShopInfo = result.data()['shop_info'];
-        ShopLocation = result.data()['location'];
-      });
-    });
-
-    super.initState();
+// SnackBar
+  void _showSnackBar(BuildContext context, String text) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(text)));
   }
 
   @override
@@ -79,15 +62,16 @@ class _ShopInformationState extends State<ShopInformation> {
                           .collection('Games')
                           .doc('$gameName')
                           .collection('ReserveList')
-                        // 사용자 이름 넣기
+                          // 사용자 이름 넣기
                           .doc('사용자예약')
-                          .delete().then((_) {
+                          .delete()
+                          .then((_) {
                         /// 예약인원수 변경(삭제)
                         firestoreInstance
                             .collection('Shop')
-                        // 가게이름
+                            // 가게이름
                             .doc('jackpotrounge')
-                        // 게임별 인덱스 설정
+                            // 게임별 인덱스 설정
                             .collection('Games')
                             .doc('$gameName')
                             .collection('ReserveList')
@@ -95,9 +79,9 @@ class _ShopInformationState extends State<ShopInformation> {
                             .then((value) {
                           firestoreInstance
                               .collection('Shop')
-                          // 가게이름
+                              // 가게이름
                               .doc('jackpotrounge')
-                          // 게임별 인덱스 설정
+                              // 게임별 인덱스 설정
                               .collection('Games')
                               .doc('$gameName')
                               .update({
@@ -117,7 +101,7 @@ class _ShopInformationState extends State<ShopInformation> {
                           .collection('Games')
                           .doc('$gameName')
                           .collection('ReserveList')
-                       // 사용자 이름 넣기
+                          // 사용자 이름 넣기
                           .doc('사용자예약')
                           .set({
                         "name": '사용자예약',
@@ -125,9 +109,9 @@ class _ShopInformationState extends State<ShopInformation> {
                         /// 예약인원수 변경(추가)
                         firestoreInstance
                             .collection('Shop')
-                        // 가게이름
+                            // 가게이름
                             .doc('jackpotrounge')
-                        // 게임별 인덱스 설정
+                            // 게임별 인덱스 설정
                             .collection('Games')
                             .doc('$gameName')
                             .collection('ReserveList')
@@ -135,9 +119,9 @@ class _ShopInformationState extends State<ShopInformation> {
                             .then((value) {
                           firestoreInstance
                               .collection('Shop')
-                          // 가게이름
+                              // 가게이름
                               .doc('jackpotrounge')
-                          // 게임별 인덱스 설정
+                              // 게임별 인덱스 설정
                               .collection('Games')
                               .doc('$gameName')
                               .update({
@@ -255,31 +239,74 @@ class _ShopInformationState extends State<ShopInformation> {
                                                 snapshot.data!.docs.length,
                                             itemBuilder: (BuildContext context,
                                                 int index) {
-                                              return new ListTile(
-                                                leading:
-                                                    Icon(Icons.games_sharp),
-                                                title: Text('${snapshot.data!.docs[index].get('게임이름')}'),
-                                                subtitle: Text('${snapshot.data!.docs[index].get('게임시작시간')}'),
-                                                trailing:game_reserve_flag
-                                                    ?
-                                                // 예약 취소
-                                                TextButton(
-                                                    onPressed: () {
-                                                      // 예약 취소 창
-                                                      showAlertDialog(snapshot.data!.docs[index].get('게임이름'));
-                                                    },
-                                                    child: Text('취소하기'))
+                                              return Slidable(
+                                                  actionPane:
+                                                      SlidableDrawerActionPane(),
+                                                  actionExtentRatio: 0.25,
+                                                  child: new ListTile(
+                                                    leading:
+                                                        Icon(Icons.games_sharp),
+                                                    title: Text(
+                                                        '${snapshot.data!.docs[index].get('게임이름')}'),
+                                                    subtitle: Text(
+                                                        '${snapshot.data!.docs[index].get('게임시작시간')}'),
+                                                    trailing: Column(
+                                                      children: [
+                                                        Text(
+                                                            '${snapshot.data!.docs[index].get('예약인원')}/ ${snapshot.data!.docs[index].get('게임대기인원')}'),
+                                                        // firestoreInstance.collection('Shop').doc('jackpotrounge').collection('Games').doc('${snapshot.data!.docs[index].get('게임이름')}').collection('ReserveList').where('name',isEqualTo: "사용자예약")
+                                                        if(false)
+                                                          Text(
+                                                              '예약 됨',style: TextStyle(color: Colors.red),),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  secondaryActions: <Widget>[
+                                                    game_reserve_flag
+                                                        ?
+                                                    IconSlideAction(
+                                                        caption: '예약취소',
+                                                        color: Colors.red,
+                                                        icon:
+                                                            Icons.move_to_inbox,
+                                                        onTap: () {
+                                                          _showSnackBar(
+                                                              context, '예약 취소');
+                                                          showAlertDialog(snapshot
+                                                              .data!
+                                                              .docs[
+                                                          index]
+                                                              .get(
+                                                              '게임이름'));
+
+                                                        })
                                                     :
-                                                // 예약 하기
-                                                TextButton(
-                                                    onPressed: () {
-                                                      // 예약 확인 창
-                                                      showAlertDialog(snapshot.data!.docs[index].get('게임이름'));
-                                                    },
-                                                    child: Text('예약하기')),
+                                                    IconSlideAction(
+                                                        caption: '예약하기',
+                                                        color: Colors.blue,
+                                                        icon:
+                                                        Icons.move_to_inbox,
+                                                        onTap: () {
+                                                          _showSnackBar(
+                                                              context, '예약 하기');
+                                                          showAlertDialog(snapshot
+                                                              .data!
+                                                              .docs[
+                                                          index]
+                                                              .get(
+                                                              '게임이름'));
+                                                        }),
 
+                                                    IconSlideAction(
+                                                        caption: '예약 현황 확인',
+                                                        color: Colors.black,
+                                                        icon: Icons.update,
+                                                        onTap: () {
+                                                          _showSnackBar(context,
+                                                              '예약 현황 확인');
 
-                                              );
+                                                        }),
+                                                  ]);
                                             }),
                                       )
                                     ],
